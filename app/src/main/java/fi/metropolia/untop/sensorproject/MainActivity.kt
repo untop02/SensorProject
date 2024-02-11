@@ -1,7 +1,5 @@
 package fi.metropolia.untop.sensorproject
 
-import BottomNavigationBar
-import NavigationHost
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
