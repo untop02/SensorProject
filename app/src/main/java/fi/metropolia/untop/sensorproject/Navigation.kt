@@ -1,10 +1,11 @@
+package fi.metropolia.untop.sensorproject
+
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
@@ -49,7 +50,7 @@ fun BottomNavigationBar(navController: NavController) {
 @Composable
 fun NavigationHost(navController: NavHostController) {
     NavHost(navController, startDestination = BottomNavItem.Home.route) {
-        composable(BottomNavItem.Home.route) { /* Home Screen UI */ }
+        composable(BottomNavItem.Home.route) {Home(navController)}
         composable(BottomNavItem.Search.route) { /* Search Screen UI */ }
         composable(BottomNavItem.Settings.route) { /* Settings Screen UI */ }
     }
