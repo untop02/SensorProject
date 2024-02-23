@@ -17,7 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Main() {
     val navController = rememberNavController()
-    var navigationSelectedItem by remember { mutableIntStateOf(0) }
+    var navigationSelectedItem by rememberSaveable { mutableIntStateOf(0) }
     SensorProjectTheme {
         Surface(
             modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
@@ -80,7 +80,7 @@ fun Main() {
             ) { innerPadding ->
                 NavHost(
                     navController = navController,
-                    startDestination = Screens.Home.route,
+                    startDestination = Destinations.Home.route,
                     modifier = Modifier.padding(paddingValues = innerPadding),
                     //MIKSI NÄMÄ EI POISTA TUOTA YHTÄ ANIMAATIOTA 💩
                     popEnterTransition = { EnterTransition.None},
@@ -88,12 +88,14 @@ fun Main() {
                     enterTransition = { EnterTransition.None},
                     exitTransition = { ExitTransition.None}
                 ) {
-                    composable(Screens.Home.route) {
+                    composable(Destinations.Home.route) {
                         Home(modifier = Modifier)
                     }
-                    composable(Screens.Search.route) {
+                    composable(Destinations.Search.route) {
+                        /*TODO*/
                     }
-                    composable(Screens.Settings.route) {
+                    composable(Destinations.Settings.route) {
+                        /*TODO*/
                     }
                 }
             }

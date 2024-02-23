@@ -6,10 +6,10 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
-sealed class Screens(val route : String) {
-    data object Home : Screens("home_route")
-    data object Search : Screens("search_route")
-    data object Settings : Screens("profile_route")
+sealed class Destinations(val route : String) {
+    data object Home : Destinations("home_route")
+    data object Search : Destinations("search_route")
+    data object Settings : Destinations("profile_route")
 }
 
 data class BottomNavigationItem(
@@ -22,17 +22,17 @@ data class BottomNavigationItem(
             BottomNavigationItem(
                 label = "Home",
                 icon = Icons.Default.Home,
-                route = Screens.Home.route
+                route = Destinations.Home.route
             ),
             BottomNavigationItem(
                 label = "Search",
                 icon = Icons.Filled.Search,
-                route = Screens.Search.route
+                route = Destinations.Search.route
             ),
             BottomNavigationItem(
                 label = "Settings",
                 icon = Icons.Filled.Settings,
-                route = Screens.Settings.route
+                route = Destinations.Settings.route
             ),
         )
     }
