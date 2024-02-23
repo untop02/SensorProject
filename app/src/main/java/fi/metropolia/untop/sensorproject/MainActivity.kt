@@ -31,64 +31,69 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val navController = rememberNavController()
-            var navigationSelectedItem by remember { mutableIntStateOf(0) }
-            SensorProjectTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
-                ) {
-                    Scaffold(
-                        bottomBar = {
-                            BottomAppBar(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.primary,
-                            ) {
-                                BottomNavigationItem().bottomNavigationItems()
-                                    .forEachIndexed { index, navigationItem ->
-                                        NavigationBarItem(
-                                            selected = index == navigationSelectedItem,
-                                            label = {
-                                                Text(navigationItem.label)
-                                            },
-                                            icon = {
-                                                Icon(
-                                                    navigationItem.icon,
-                                                    contentDescription = navigationItem.label
-                                                )
-                                            },
-                                            onClick = {
-                                                navigationSelectedItem = index
-                                                navController.navigate(navigationItem.route) {
-                                                    popUpTo(navController.graph.findStartDestination().id) {
-                                                        saveState = true
-                                                    }
-                                                    launchSingleTop = true
-                                                    restoreState = true
-                                                }
-                                            }
+            Main()
+        }
+    }
+}
+
+@Composable
+fun Main() {
+    val navController = rememberNavController()
+    var navigationSelectedItem by remember { mutableIntStateOf(0) }
+    SensorProjectTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
+        ) {
+            Scaffold(
+                bottomBar = {
+                    BottomAppBar(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.primary,
+                    ) {
+                        BottomNavigationItem().bottomNavigationItems()
+                            .forEachIndexed { index, navigationItem ->
+                                NavigationBarItem(
+                                    selected = index == navigationSelectedItem,
+                                    label = {
+                                        Text(navigationItem.label)
+                                    },
+                                    icon = {
+                                        Icon(
+                                            navigationItem.icon,
+                                            contentDescription = navigationItem.label
                                         )
+                                    },
+                                    onClick = {
+                                        navigationSelectedItem = index
+                                        navController.navigate(navigationItem.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
                                     }
+                                )
                             }
-                        },
-                    ) { innerPadding ->
-                        NavHost(
-                            navController = navController,
-                            startDestination = Screens.Home.route,
-                            modifier = Modifier.padding(paddingValues = innerPadding),
-                            //MIKSI NÄMÄ EI POISTA TUOTA YHTÄ ANIMAATIOTA 💩
-                            popEnterTransition = { EnterTransition.None},
-                            popExitTransition = { ExitTransition.None},
-                            enterTransition = { EnterTransition.None},
-                            exitTransition = { ExitTransition.None}
-                        ) {
-                            composable(Screens.Home.route) {
-                                Home(modifier = Modifier)
-                            }
-                            composable(Screens.Search.route) {
-                            }
-                            composable(Screens.Settings.route) {
-                            }
-                        }
+                    }
+                },
+            ) { innerPadding ->
+                NavHost(
+                    navController = navController,
+                    startDestination = Screens.Home.route,
+                    modifier = Modifier.padding(paddingValues = innerPadding),
+                    //MIKSI NÄMÄ EI POISTA TUOTA YHTÄ ANIMAATIOTA 💩
+                    popEnterTransition = { EnterTransition.None},
+                    popExitTransition = { ExitTransition.None},
+                    enterTransition = { EnterTransition.None},
+                    exitTransition = { ExitTransition.None}
+                ) {
+                    composable(Screens.Home.route) {
+                        Home(modifier = Modifier)
+                    }
+                    composable(Screens.Search.route) {
+                    }
+                    composable(Screens.Settings.route) {
                     }
                 }
             }
@@ -96,10 +101,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     SensorProjectTheme {
-
+        Main()
     }
 }
