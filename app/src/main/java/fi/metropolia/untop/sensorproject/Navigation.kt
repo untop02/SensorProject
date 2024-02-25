@@ -6,18 +6,18 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
-sealed class Destinations(val route : String) {
+sealed class Destinations(val route: String) {
     data object Home : Destinations("home_route")
     data object History : Destinations("history_route")
     data object Settings : Destinations("profile_route")
 }
 
 data class BottomNavigationItem(
-    val label : String = "",
-    val icon : ImageVector = Icons.Filled.Home,
-    val route : String = ""
+    val label: String = "",
+    val icon: ImageVector = Icons.Filled.Home,
+    val route: String = ""
 ) {
-    fun bottomNavigationItems() : List<BottomNavigationItem> {
+    fun bottomNavigationItems(): List<BottomNavigationItem> {
         return listOf(
             BottomNavigationItem(
                 label = "Home",

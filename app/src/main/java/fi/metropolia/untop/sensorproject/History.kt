@@ -1,5 +1,10 @@
 package fi.metropolia.untop.sensorproject
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,39 +22,57 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import fi.metropolia.untop.sensorproject.ui.theme.Pink40
 
 @Composable
 fun History(modifier: Modifier) {
+    val colors = listOf(Color.Green, Color.Cyan, Color.Red, Pink40)
+    val currentFontSizePx = with(LocalDensity.current) { 50.dp.toPx() }
+    val currentFontSizeDoublePx = currentFontSizePx * 2
+
+    val infiniteTransition = rememberInfiniteTransition(label = "")
+    val offset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = currentFontSizeDoublePx,
+        animationSpec = infiniteRepeatable(tween(1000, easing = LinearEasing)), label = ""
+    )
     val list = arrayListOf(
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "10",
-        "11",
-        "12",
-        "13",
-        "14",
-        "15",
-        "16",
-        "17",
-        "18",
-        "19",
-        "20"
+        "Test 1",
+        "Test 2",
+        "Test 3",
+        "Test 4",
+        "Test 5",
+        "Test 6",
+        "Test 7",
+        "Test 8",
+        "Test 9",
+        "Test 10",
+        "Test 11",
+        "Test 12",
+        "Test 13",
+        "Test 14",
+        "Test 15",
+        "Test 16",
+        "Test 17",
+        "Test 18",
+        "Test 19",
+        "Test 20"
     )
     Box(
         modifier = modifier
@@ -63,7 +86,15 @@ fun History(modifier: Modifier) {
                 "History",
                 modifier.padding(16.dp),
                 fontFamily = FontFamily.Cursive,
-                fontSize = 50.sp
+                fontSize = 70.sp,
+                style = TextStyle(
+                    Brush.linearGradient(
+                        colors = colors,
+                        start = Offset(offset, offset),
+                        end = Offset(offset + currentFontSizePx, offset + currentFontSizePx),
+                        tileMode = TileMode.Mirror
+                    )
+                )
             )
             LazyColumn(
                 modifier.padding(16.dp),
