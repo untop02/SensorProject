@@ -95,7 +95,8 @@ fun ListItem(modifier: Modifier, item: String) {
             Column(
                 modifier
                     .align(Alignment.CenterVertically)
-                    .padding(start = 5.dp)) {
+                    .padding(start = 5.dp)
+            ) {
                 Text(text = item)
                 Text(text = "Subtext")
             }
