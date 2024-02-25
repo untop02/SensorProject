@@ -4,8 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
@@ -19,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -79,11 +78,7 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             startDestination = Destinations.Home.route,
                             modifier = Modifier.padding(paddingValues = innerPadding),
-                            //MIKSI NÄMÄ EI POISTA TUOTA YHTÄ ANIMAATIOTA 💩
-                            popEnterTransition = { EnterTransition.None},
-                            popExitTransition = { ExitTransition.None},
-                            enterTransition = { EnterTransition.None},
-                            exitTransition = { ExitTransition.None}
+                            contentAlignment = Alignment.TopCenter
                         ) {
                             composable(Destinations.Home.route) {
                                 Home(modifier = Modifier, viewModel)
