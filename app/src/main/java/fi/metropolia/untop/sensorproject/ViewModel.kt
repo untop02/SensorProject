@@ -9,8 +9,8 @@ import java.lang.Thread.sleep
 import java.util.concurrent.ThreadLocalRandom
 
 class MyViewModel : ViewModel() {
-    val testTempData = MutableLiveData(0)
-    val testHumData = MutableLiveData(0)
+    val test1Data = MutableLiveData(0)
+    val test2Data = MutableLiveData(0)
     val test3Data = MutableLiveData(0)
     val test4Data = MutableLiveData(0)
 

@@ -17,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -29,8 +28,8 @@ class MainActivity : ComponentActivity() {
     private val viewModel: MyViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.makeTestData(viewModel.testTempData)
-        viewModel.makeTestData(viewModel.testHumData)
+        viewModel.makeTestData(viewModel.test1Data)
+        viewModel.makeTestData(viewModel.test2Data)
         viewModel.makeTestData(viewModel.test3Data)
         viewModel.makeTestData(viewModel.test4Data)
         setContent {
@@ -78,13 +77,12 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             startDestination = Destinations.Home.route,
                             modifier = Modifier.padding(paddingValues = innerPadding),
-                            contentAlignment = Alignment.TopCenter
                         ) {
                             composable(Destinations.Home.route) {
                                 Home(modifier = Modifier, viewModel)
                             }
                             composable(Destinations.History.route) {
-                                /*TODO*/
+                                History(modifier = Modifier)
                             }
                             composable(Destinations.Settings.route) {
                                 /*TODO*/
