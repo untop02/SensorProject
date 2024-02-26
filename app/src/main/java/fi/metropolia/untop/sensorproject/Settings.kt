@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -35,7 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,8 +66,8 @@ fun Settings(modifier: Modifier) {
                     Modifier.clip(shape = RoundedCornerShape(500.dp))
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.lynch),
-                        contentDescription = "David Lynch",
+                        imageVector = Icons.Rounded.Build,
+                        contentDescription = "Setting",
                         contentScale = ContentScale.Crop,
                         modifier = modifier
                             .padding(8.dp)

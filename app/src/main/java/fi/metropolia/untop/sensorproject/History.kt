@@ -114,7 +114,7 @@ fun ListItem(modifier: Modifier, item: String) {
     Card(modifier.fillMaxWidth()) {
         Row {
             Image(
-                painter = painterResource(id = R.drawable.lynch),
+                painter = painterResource(id = R.drawable.cage),
                 contentDescription = "David Lynch",
                 contentScale = ContentScale.Crop,
                 modifier = modifier
