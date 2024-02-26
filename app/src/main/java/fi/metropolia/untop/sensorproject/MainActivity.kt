@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
                                 History(modifier = Modifier)
                             }
                             composable(Destinations.Settings.route) {
-                                /*TODO*/
+                                Settings(modifier = Modifier)
                             }
                         }
                     }

@@ -43,7 +43,7 @@ import fi.metropolia.untop.sensorproject.ui.theme.Pink40
 @Composable
 fun History(modifier: Modifier) {
     val colors = listOf(Color.Green, Color.Cyan, Color.Red, Pink40)
-    val currentFontSizePx = with(LocalDensity.current) { 50.dp.toPx() }
+    val currentFontSizePx = with(LocalDensity.current) { 70.dp.toPx() }
     val currentFontSizeDoublePx = currentFontSizePx * 2
 
     val infiniteTransition = rememberInfiniteTransition(label = "")
