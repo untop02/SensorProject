@@ -10,6 +10,7 @@ sealed class Destinations(val route: String) {
     data object Home : Destinations("home_route")
     data object History : Destinations("history_route")
     data object Settings : Destinations("profile_route")
+    data object Graph : Destinations("graph_route")
 }
 
 data class BottomNavigationItem(

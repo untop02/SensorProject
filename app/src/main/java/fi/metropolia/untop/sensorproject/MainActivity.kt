@@ -22,6 +22,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import fi.metropolia.untop.sensorproject.ui.theme.SensorProjectTheme
 
 class MainActivity : ComponentActivity() {
@@ -79,13 +80,17 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.padding(paddingValues = innerPadding),
                         ) {
                             composable(Destinations.Home.route) {
-                                Home(modifier = Modifier, viewModel)
+                                Home(modifier = Modifier, viewModel, navController)
                             }
                             composable(Destinations.History.route) {
                                 History(modifier = Modifier)
                             }
                             composable(Destinations.Settings.route) {
                                 Settings(modifier = Modifier)
+                            }
+                            composable(Destinations.Graph.route.plus("?observedName={observedName}"), arguments = listOf(
+                                navArgument("observedName") {defaultValue = "null"})) {
+                                Graph(modifier = Modifier, viewModel, it.arguments?.getString("observedName"))
                             }
                         }
                     }

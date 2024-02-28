@@ -59,7 +59,7 @@ dependencies {
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
-    implementation ("androidx.compose.runtime:runtime-livedata:1.6.1")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.6.2")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
@@ -71,4 +71,19 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+    // For Jetpack Compose.
+    implementation("com.patrykandpatrick.vico:compose:1.14.0")
+
+    // For `compose`. Creates a `ChartStyle` based on an M2 Material Theme.
+    implementation("com.patrykandpatrick.vico:compose-m2:1.14.0")
+
+    // For `compose`. Creates a `ChartStyle` based on an M3 Material Theme.
+    implementation("com.patrykandpatrick.vico:compose-m3:1.14.0")
+
+    // Houses the core logic for charts and other elements. Included in all other modules.
+    implementation("com.patrykandpatrick.vico:core:1.14.0")
+
+    // For the view system.
+    implementation("com.patrykandpatrick.vico:views:1.14.0")
+
 }
