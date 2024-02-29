@@ -37,6 +37,7 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
         index.intValue++
         modelProducer.tryRunTransaction { lineSeries { series(valueList) } }
     }
+
     Column(modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = data.toString())
         CartesianChartHost(
