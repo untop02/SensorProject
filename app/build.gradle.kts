@@ -71,18 +71,15 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-    // Houses the core logic for charts and other elements. Included in all other modules.
-    implementation("com.patrykandpatrick.vico:core:1.14.0")
-    // For Jetpack Compose.
-    implementation("com.patrykandpatrick.vico:compose:1.14.0")
+
+    implementation("com.patrykandpatrick.vico:compose:2.0.0-alpha.8")
 
     // For `compose`. Creates a `ChartStyle` based on an M2 Material Theme.
-    implementation("com.patrykandpatrick.vico:compose-m2:1.14.0")
+    implementation("com.patrykandpatrick.vico:compose-m2:2.0.0-alpha.8")
 
     // For `compose`. Creates a `ChartStyle` based on an M3 Material Theme.
-    implementation("com.patrykandpatrick.vico:compose-m3:1.14.0")
-    // https://github.com/dautovicharis/Charts/tree/develop
-    implementation("com.github.dautovicharis:Charts:1.2.0")
-    //Ycharts
-    implementation ("co.yml:ycharts:2.1.0")
+    implementation("com.patrykandpatrick.vico:compose-m3:2.0.0-alpha.8")
+
+    // Houses the core logic for charts and other elements. Included in all other modules.
+    implementation("com.patrykandpatrick.vico:core:2.0.0-alpha.8")
 }
