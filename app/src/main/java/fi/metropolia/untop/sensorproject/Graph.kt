@@ -46,7 +46,7 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
                 startAxis = rememberStartAxis(),
                 bottomAxis = rememberBottomAxis(),
             ),
-            modelProducer,
+            modelProducer =  modelProducer,
             marker = rememberMarker(),
         )
     }
