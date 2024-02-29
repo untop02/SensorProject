@@ -31,11 +31,12 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
         //Pitää vielä säätää oikein, sitte ko tietää mitä näytetään🐨
         else -> viewModel.test3Data.observeAsState(initial = 0).value
     }
+
     LaunchedEffect(data) {
         valueList.add(data.toFloat())
         index.intValue++
+        modelProducer.tryRunTransaction { lineSeries { series(valueList) } }
     }
-        LaunchedEffect(data) { modelProducer.tryRunTransaction { lineSeries { series(valueList) } } }
     Column(modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = data.toString())
         CartesianChartHost(
