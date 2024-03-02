@@ -1,6 +1,6 @@
 package fi.metropolia.untop.sensorproject
 
-import android.graphics.BlendMode
+import android.graphics.PorterDuff
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
@@ -18,16 +18,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
 import com.patrykandpatrick.vico.compose.chart.CartesianChartHost
 import com.patrykandpatrick.vico.compose.chart.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.chart.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.component.shape.shader.color
+import com.patrykandpatrick.vico.compose.component.shape.shader.fromComponent
+import com.patrykandpatrick.vico.compose.component.shape.shader.verticalGradient
+import com.patrykandpatrick.vico.compose.dimensions.dimensionsOf
+import com.patrykandpatrick.vico.core.axis.AxisItemPlacer
 import com.patrykandpatrick.vico.core.chart.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.core.component.shape.Shapes
 import com.patrykandpatrick.vico.core.component.shape.shader.DynamicShaders
+import com.patrykandpatrick.vico.core.component.shape.shader.TopBottomShader
 import com.patrykandpatrick.vico.core.model.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.model.lineSeries
 import fi.metropolia.untop.sensorproject.graphs.ComposeChart1
@@ -68,10 +76,38 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
                                 Color.Green
                             ),
                             thicknessDp = 8f,
-                            backgroundShader = DynamicShaders.composeShader(
-                                DynamicShaders.color(
-                                    Color.Yellow
-                                ), DynamicShaders.color(Color.Magenta), BlendMode.HUE
+                            backgroundShader = TopBottomShader(
+                                DynamicShaders.composeShader(
+                                    DynamicShaders.fromComponent(
+                                        componentSize = 6.dp,
+                                        component =
+                                        rememberShapeComponent(
+                                            shape = Shapes.pillShape,
+                                            color = Color.Green,
+                                            margins = remember { dimensionsOf(1.dp) },
+                                        ),
+                                    ),
+                                    DynamicShaders.verticalGradient(
+                                        arrayOf(Color.Black, Color.Transparent),
+                                    ),
+                                    PorterDuff.Mode.DST_IN,
+                                ),
+                                DynamicShaders.composeShader(
+                                    DynamicShaders.fromComponent(
+                                        componentSize = 5.dp,
+                                        component =
+                                        rememberShapeComponent(
+                                            shape = Shapes.rectShape,
+                                            color = Color.Transparent,
+                                            margins = remember { dimensionsOf(horizontal = 2.dp) },
+                                        ),
+                                        checkeredArrangement = false,
+                                    ),
+                                    DynamicShaders.verticalGradient(
+                                        arrayOf(Color.Transparent, Color.Black),
+                                    ),
+                                    PorterDuff.Mode.DST_IN,
+                                ),
                             ),
                             dataLabel = rememberTextComponent(
                                 color = Color.Magenta,
@@ -80,7 +116,9 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
                         )
                     )
                 ),
-                startAxis = rememberStartAxis(label = rememberTextComponent(color = Color.Blue)),
+                startAxis = rememberStartAxis(label = rememberTextComponent(color = Color.Blue), itemPlacer = remember {
+                    AxisItemPlacer.Vertical.default(maxItemCount = { 5 })
+                }),
                 bottomAxis = rememberBottomAxis(guideline = null),
             ),
             modelProducer = modelProducer,
@@ -100,6 +138,34 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
     }
 }
 
+
+/*CartesianChartHost(
+            rememberCartesianChart(
+                rememberLineCartesianLayer(
+                    listOf(
+                        LineCartesianLayer.LineSpec(
+                            shader = DynamicShaders.color(
+                                Color.Green
+                            ),
+                            thicknessDp = 8f,
+                            backgroundShader = DynamicShaders.composeShader(
+                                DynamicShaders.color(
+                                    Color.Yellow
+                                ), DynamicShaders.color(Color.Magenta), BlendMode.HUE
+                            ),
+                            dataLabel = rememberTextComponent(
+                                color = Color.Magenta,
+                                textSize = 15.sp
+                            )
+                        )
+                    )
+                ),
+                startAxis = rememberStartAxis(label = rememberTextComponent(color = Color.Blue)),
+                bottomAxis = rememberBottomAxis(guideline = null),
+            ),
+            modelProducer = modelProducer,
+            marker = rememberMarker(),
+        )*/
 @RequiresApi(Build.VERSION_CODES.Q)
 @Preview
 @Composable
