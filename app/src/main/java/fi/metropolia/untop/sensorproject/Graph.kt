@@ -1,7 +1,12 @@
 package fi.metropolia.untop.sensorproject
 
+import android.graphics.BlendMode
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -11,14 +16,28 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
 import com.patrykandpatrick.vico.compose.chart.CartesianChartHost
 import com.patrykandpatrick.vico.compose.chart.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.chart.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.component.rememberTextComponent
+import com.patrykandpatrick.vico.compose.component.shape.shader.color
+import com.patrykandpatrick.vico.core.chart.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.core.component.shape.shader.DynamicShaders
 import com.patrykandpatrick.vico.core.model.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.model.lineSeries
+import fi.metropolia.untop.sensorproject.graphs.ComposeChart1
+import fi.metropolia.untop.sensorproject.graphs.ComposeChart3
+import fi.metropolia.untop.sensorproject.graphs.ComposeChart4
+import fi.metropolia.untop.sensorproject.graphs.ComposeChart7
+import fi.metropolia.untop.sensorproject.graphs.ComposeChart8
+import fi.metropolia.untop.sensorproject.graphs.ComposeChart9
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
     val valueList = remember { mutableStateListOf<Number>() }
@@ -42,14 +61,48 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
         Text(text = data.toString())
         CartesianChartHost(
             rememberCartesianChart(
-                rememberLineCartesianLayer(),
-                startAxis = rememberStartAxis(),
-                bottomAxis = rememberBottomAxis(),
+                rememberLineCartesianLayer(
+                    listOf(
+                        LineCartesianLayer.LineSpec(
+                            shader = DynamicShaders.color(
+                                Color.Green
+                            ),
+                            thicknessDp = 8f,
+                            backgroundShader = DynamicShaders.composeShader(
+                                DynamicShaders.color(
+                                    Color.Yellow
+                                ), DynamicShaders.color(Color.Magenta), BlendMode.HUE
+                            ),
+                            dataLabel = rememberTextComponent(
+                                color = Color.Magenta,
+                                textSize = 15.sp
+                            )
+                        )
+                    )
+                ),
+                startAxis = rememberStartAxis(label = rememberTextComponent(color = Color.Blue)),
+                bottomAxis = rememberBottomAxis(guideline = null),
             ),
-            modelProducer =  modelProducer,
+            modelProducer = modelProducer,
             marker = rememberMarker(),
         )
+        Column(
+            modifier.verticalScroll(rememberScrollState())
+        ) {
+            ComposeChart1(modelProducer = modelProducer)
+            ComposeChart3(modelProducer = modelProducer)
+            ComposeChart4(modelProducer = modelProducer)
+            ComposeChart7(modelProducer = modelProducer)
+            ComposeChart8(modelProducer = modelProducer)
+            ComposeChart9(modelProducer = modelProducer)
+        }
+
     }
+}
 
-
+@RequiresApi(Build.VERSION_CODES.Q)
+@Preview
+@Composable
+private fun GraphTest() {
+    Graph(modifier = Modifier, viewModel = MyViewModel(), name = "Temperature")
 }
