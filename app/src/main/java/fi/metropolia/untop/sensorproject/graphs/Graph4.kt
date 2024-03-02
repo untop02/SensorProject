@@ -30,7 +30,7 @@ import fi.metropolia.untop.sensorproject.rememberMarker
 fun ComposeChart7(
     modelProducer: CartesianChartModelProducer,
 ) {
-    ProvideChartStyle() {
+    ProvideChartStyle(rememberChartStyle(chartColors)) {
         val defaultLines = currentChartStyle.lineLayer.lines
         CartesianChartHost(
             chart =

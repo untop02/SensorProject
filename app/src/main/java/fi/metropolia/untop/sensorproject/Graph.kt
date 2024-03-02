@@ -36,6 +36,7 @@ import com.patrykandpatrick.vico.core.chart.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.core.component.shape.Shapes
 import com.patrykandpatrick.vico.core.component.shape.shader.DynamicShaders
 import com.patrykandpatrick.vico.core.component.shape.shader.TopBottomShader
+import com.patrykandpatrick.vico.core.marker.Marker
 import com.patrykandpatrick.vico.core.model.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.model.lineSeries
 import fi.metropolia.untop.sensorproject.graphs.ComposeChart1
@@ -49,6 +50,9 @@ import fi.metropolia.untop.sensorproject.graphs.ComposeChart9
 @Composable
 fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
     val valueList = remember { mutableStateListOf<Number>() }
+    val markerList = remember {
+        mutableMapOf<Float, Marker>()
+    }
     val index = remember { mutableIntStateOf(0) }
     val modelProducer = remember { CartesianChartModelProducer.build() }
 
@@ -75,7 +79,7 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
                             shader = DynamicShaders.color(
                                 Color.Green
                             ),
-                            thicknessDp = 8f,
+                            thicknessDp = 3f,
                             backgroundShader = TopBottomShader(
                                 DynamicShaders.composeShader(
                                     DynamicShaders.fromComponent(
@@ -83,7 +87,7 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
                                         component =
                                         rememberShapeComponent(
                                             shape = Shapes.pillShape,
-                                            color = Color.Green,
+                                            color = Color.Blue,
                                             margins = remember { dimensionsOf(1.dp) },
                                         ),
                                     ),
@@ -106,7 +110,7 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
                                     DynamicShaders.verticalGradient(
                                         arrayOf(Color.Transparent, Color.Black),
                                     ),
-                                    PorterDuff.Mode.DST_IN,
+                                    PorterDuff.Mode.DST,
                                 ),
                             ),
                             dataLabel = rememberTextComponent(
@@ -116,9 +120,12 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
                         )
                     )
                 ),
-                startAxis = rememberStartAxis(label = rememberTextComponent(color = Color.Blue), itemPlacer = remember {
-                    AxisItemPlacer.Vertical.default(maxItemCount = { 5 })
-                }),
+                startAxis = rememberStartAxis(
+                    label = rememberTextComponent(
+                        color = Color.Blue,
+                    ), itemPlacer = remember {
+                        AxisItemPlacer.Vertical.default(maxItemCount = { 5 })
+                    }),
                 bottomAxis = rememberBottomAxis(guideline = null),
             ),
             modelProducer = modelProducer,

@@ -20,7 +20,7 @@ fun ComposeChart1(
     modelProducer: CartesianChartModelProducer,
 ) {
     val marker = rememberMarker()
-    ProvideChartStyle() {
+    ProvideChartStyle(rememberChartStyle(chartColors)) {
         CartesianChartHost(
             chart =
             rememberCartesianChart(

@@ -24,7 +24,7 @@ import fi.metropolia.untop.sensorproject.rememberMarker
 fun ComposeChart4(
     modelProducer: CartesianChartModelProducer,
 ) {
-    ProvideChartStyle() {
+    ProvideChartStyle(rememberChartStyle(columnChartColors, lineChartColors)) {
         val defaultColumns = currentChartStyle.columnLayer.columns
         val defaultLines = currentChartStyle.lineLayer.lines
         CartesianChartHost(
@@ -58,6 +58,7 @@ private val color1 = Color(COLOR_1_CODE)
 private val color2 = Color(COLOR_2_CODE)
 private val color3 = Color(COLOR_3_CODE)
 private val color4 = Color(COLOR_4_CODE)
+
 private val columnChartColors = listOf(color1, color2, color3)
 private val lineChartColors = listOf(color4)
 private val columnCornerRadius = 2.dp

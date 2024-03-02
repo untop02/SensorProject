@@ -28,7 +28,7 @@ import fi.metropolia.untop.sensorproject.rememberMarker
 fun ComposeChart3(
     modelProducer: CartesianChartModelProducer,
 ) {
-    ProvideChartStyle() {
+    ProvideChartStyle(rememberChartStyle(chartColors)) {
         CartesianChartHost(
             chart =
             rememberCartesianChart(
