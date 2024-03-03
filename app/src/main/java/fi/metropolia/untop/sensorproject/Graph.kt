@@ -57,10 +57,10 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
     val modelProducer = remember { CartesianChartModelProducer.build() }
 
     val data = when (name) {
-        "Temperature" -> viewModel.test1Data.observeAsState(initial = 0).value
-        "Humidity" -> viewModel.test2Data.observeAsState(initial = 0).value
+        "Temperature" -> viewModel.ambientTemp.observeAsState(initial = 0).value
+        "Humidity" -> viewModel.humidity.observeAsState(initial = 0).value
         //Pitää vielä säätää oikein, sitte ko tietää mitä näytetään🐨
-        else -> viewModel.test3Data.observeAsState(initial = 0).value
+        else -> viewModel.pressure.observeAsState(initial = 0).value
     }
 
     LaunchedEffect(data) {

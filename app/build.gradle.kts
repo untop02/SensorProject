@@ -47,11 +47,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    testOptions {
-        emulatorControl {
-            enable = true
-        }
-    }
 }
 
 dependencies {
@@ -78,6 +73,9 @@ dependencies {
     androidTestImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+    implementation("com.google.android.gms:play-services-location:21.1.0")
+    implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
+    implementation("io.coil-kt:coil:2.6.0")
 
     implementation("com.patrykandpatrick.vico:compose:2.0.0-alpha.8")
 

@@ -17,6 +17,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,6 +27,7 @@ import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostController) {
+    val context = LocalContext.current
     Box(
         modifier = Modifier
             .fillMaxSize(),
@@ -44,14 +46,16 @@ fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostContr
                 CustomCard(
                     modifier = modifier,
                     name = "Temperature",
-                    observedValue = viewModel.test1Data.observeAsState(0),
-                    navController = navController
+                    value = viewModel.ambientTemp.observeAsState(0.0),
+                    navController = navController,
+                    unit = " °C"
                 )
                 CustomCard(
                     modifier = modifier,
                     name = "Humidity",
-                    observedValue = viewModel.test2Data.observeAsState(0),
-                    navController = navController
+                    value = viewModel.humidity.observeAsState(0.0),
+                    navController = navController,
+                    unit = " %"
                 )
             }
             Row(
@@ -62,17 +66,20 @@ fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostContr
             ) {
                 CustomCard(
                     modifier = modifier,
-                    name = "Sensor stuff",
-                    observedValue = viewModel.test3Data.observeAsState(0),
-                    navController = navController
+                    name = "Ambient air pressure",
+                    value = viewModel.pressure.observeAsState(0.0),
+                    navController = navController,
+                    unit = " hPa"
                 )
                 CustomCard(
                     modifier = modifier,
-                    name = "Sensor stuff",
-                    observedValue = viewModel.test4Data.observeAsState(0),
-                    navController = navController
+                    name = "Illuminance",
+                    value = viewModel.light.observeAsState(0.0),
+                    navController = navController,
+                    unit = " lx"
                 )
             }
+            Weather(modifier = Modifier, context = context, viewModel = viewModel)
         }
     }
 }
@@ -81,8 +88,9 @@ fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostContr
 fun CustomCard(
     modifier: Modifier,
     name: String,
-    observedValue: State<Int>,
-    navController: NavHostController
+    value: State<Double>,
+    navController: NavHostController,
+    unit: String
 ) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
@@ -101,7 +109,7 @@ fun CustomCard(
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = observedValue.value.toString(), modifier = modifier
+            text = value.value.toString() + unit, modifier = modifier
                 .padding(16.dp)
                 .align(Alignment.CenterHorizontally), textAlign = TextAlign.Center
         )
