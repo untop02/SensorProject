@@ -47,6 +47,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
         mPressure = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE)
         mHumidity = mSensorManager.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY)
+        Log.d("DBG", "All available Ambient Temp sensors ${mSensorManager.getSensorList(Sensor.TYPE_AMBIENT_TEMPERATURE)}")
+        Log.d("DBG", "All available Light sensors ${mSensorManager.getSensorList(Sensor.TYPE_LIGHT)}")
+        Log.d("DBG", "All available Pressure sensors: ${mSensorManager.getSensorList(Sensor.TYPE_PRESSURE)}")
+        Log.d("DBG", "All available Humidity sensors: ${mSensorManager.getSensorList(Sensor.TYPE_RELATIVE_HUMIDITY)}")
         /*
                 viewModel.makeTestData(viewModel.ambientTemp)
                 viewModel.makeTestData(viewModel.humidity)

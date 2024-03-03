@@ -101,7 +101,7 @@ fun CustomCard(
             defaultElevation = 6.dp
         ),
         modifier = modifier
-            .width(150.dp)
+            .width(170.dp)
             .clickable { navController.navigate(Destinations.Graph.route.plus("?observedName=$name")) }
     ) {
         Text(
@@ -120,24 +120,9 @@ fun CustomCard(
     }
 }
 
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun HomePrev() {
     val navController = rememberNavController()
     Home(modifier = Modifier, viewModel = MyViewModel(), navController = navController)
 }
-/*
-@Composable
-fun ElevatedCard(
-    elevation: Int,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    Card(
-        modifier = modifier,
-        elevation = elevation
-    ) {
-        content()
-    }
-}*/

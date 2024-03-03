@@ -77,7 +77,6 @@ private fun getLocation(
             }
         }
         .addOnFailureListener { exception ->
-            // If an error occurs, invoke the failure callback with the exception
             onGetLastLocationFailed(exception)
         }
 }
