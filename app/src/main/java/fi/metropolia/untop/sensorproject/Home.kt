@@ -12,7 +12,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +22,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun Home(modifier: Modifier, viewModel: MyViewModel) {
+    val pressureData = viewModel.pressureData.observeAsState(0)
+
+
     Box(
         modifier = Modifier
             .fillMaxSize(),
@@ -41,12 +43,12 @@ fun Home(modifier: Modifier, viewModel: MyViewModel) {
                 CustomCard(
                     modifier = modifier,
                     name = "Temperature",
-                    value = viewModel.test1Data.observeAsState(0)
+                    value = pressureData.value
                 )
                 CustomCard(
                     modifier = modifier,
                     name = "Humidity",
-                    value = viewModel.test2Data.observeAsState(0)
+                    value = pressureData.value
                 )
             }
             Row(
@@ -57,13 +59,13 @@ fun Home(modifier: Modifier, viewModel: MyViewModel) {
             ) {
                 CustomCard(
                     modifier = modifier,
-                    name = "Sensor stuff",
-                    value = viewModel.test3Data.observeAsState(0)
+                    name = "Pressure",
+                    value = pressureData.value
                 )
                 CustomCard(
                     modifier = modifier,
                     name = "Sensor stuff",
-                    value = viewModel.test4Data.observeAsState(0)
+                    value = pressureData.value
                 )
             }
         }
@@ -71,7 +73,7 @@ fun Home(modifier: Modifier, viewModel: MyViewModel) {
 }
 
 @Composable
-fun CustomCard(modifier: Modifier, name: String, value: State<Int>) {
+fun CustomCard(modifier: Modifier, name: String, value: Int) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
@@ -87,7 +89,7 @@ fun CustomCard(modifier: Modifier, name: String, value: State<Int>) {
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = value.value.toString(), modifier = modifier
+            text = value.toString(), modifier = modifier
                 .padding(16.dp)
                 .align(Alignment.CenterHorizontally), textAlign = TextAlign.Center
         )

@@ -13,6 +13,7 @@ class MyViewModel : ViewModel() {
     val test2Data = MutableLiveData(0)
     val test3Data = MutableLiveData(0)
     val test4Data = MutableLiveData(0)
+    val pressureData = MutableLiveData(0)
 
     fun makeTestData(testData: MutableLiveData<Int>) {
         viewModelScope.launch(Dispatchers.IO) {
