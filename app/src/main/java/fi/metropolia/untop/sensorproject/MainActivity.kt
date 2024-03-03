@@ -1,5 +1,10 @@
 package fi.metropolia.untop.sensorproject
 
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,14 +29,21 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import fi.metropolia.untop.sensorproject.ui.theme.SensorProjectTheme
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), SensorEventListener {
+    private lateinit var mSensorManager: SensorManager
+    private var mTemp: Sensor? = null
+    private var mLight: Sensor? = null
+    private var mPressure: Sensor? = null
+    private var mHumidity: Sensor? = null
+
     private val viewModel: MyViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.makeTestData(viewModel.test1Data)
-        viewModel.makeTestData(viewModel.test2Data)
-        viewModel.makeTestData(viewModel.test3Data)
-        viewModel.makeTestData(viewModel.test4Data)
+        mSensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        mTemp = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
+        mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+        mPressure = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE)
+        mHumidity = mSensorManager.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY)
         setContent {
             val navController = rememberNavController()
             var navigationSelectedItem by rememberSaveable { mutableIntStateOf(0) }
@@ -47,8 +59,7 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 BottomNavigationItem().bottomNavigationItems()
                                     .forEachIndexed { index, navigationItem ->
-                                        NavigationBarItem(
-                                            selected = index == navigationSelectedItem,
+                                        NavigationBarItem(selected = index == navigationSelectedItem,
                                             label = {
                                                 Text(navigationItem.label)
                                             },
@@ -67,8 +78,7 @@ class MainActivity : ComponentActivity() {
                                                     launchSingleTop = true
                                                     restoreState = true
                                                 }
-                                            }
-                                        )
+                                            })
                                     }
                             }
                         },
@@ -91,6 +101,29 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mSensorManager.registerListener(this, mTemp, SensorManager.SENSOR_DELAY_NORMAL)
+        mSensorManager.registerListener(this, mLight, SensorManager.SENSOR_DELAY_NORMAL)
+        mSensorManager.registerListener(this, mPressure, SensorManager.SENSOR_DELAY_NORMAL)
+        mSensorManager.registerListener(this, mHumidity, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mSensorManager.unregisterListener(this)
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
+    override fun onSensorChanged(event: SensorEvent) {
+        when (event.sensor.type) {
+            Sensor.TYPE_AMBIENT_TEMPERATURE -> viewModel.ambientTemp.postValue(event.values[0].toDouble())
+            Sensor.TYPE_LIGHT -> viewModel.light.postValue(event.values[0].toDouble())
+            Sensor.TYPE_PRESSURE -> viewModel.pressure.postValue(event.values[0].toDouble())
+            Sensor.TYPE_RELATIVE_HUMIDITY -> viewModel.humidity.postValue(event.values[0].toDouble())
         }
     }
 }

@@ -41,12 +41,14 @@ fun Home(modifier: Modifier, viewModel: MyViewModel) {
                 CustomCard(
                     modifier = modifier,
                     name = "Temperature",
-                    value = viewModel.test1Data.observeAsState(0)
+                    value = viewModel.ambientTemp.observeAsState(0.0),
+                    unit = " °C"
                 )
                 CustomCard(
                     modifier = modifier,
                     name = "Humidity",
-                    value = viewModel.test2Data.observeAsState(0)
+                    value = viewModel.humidity.observeAsState(0.0),
+                    unit = " %"
                 )
             }
             Row(
@@ -57,13 +59,15 @@ fun Home(modifier: Modifier, viewModel: MyViewModel) {
             ) {
                 CustomCard(
                     modifier = modifier,
-                    name = "Sensor stuff",
-                    value = viewModel.test3Data.observeAsState(0)
+                    name = "Ambient air pressure",
+                    value = viewModel.pressure.observeAsState(0.0),
+                    unit = " hPa"
                 )
                 CustomCard(
                     modifier = modifier,
-                    name = "Sensor stuff",
-                    value = viewModel.test4Data.observeAsState(0)
+                    name = "Illuminance",
+                    value = viewModel.light.observeAsState(0.0),
+                    unit = " lx"
                 )
             }
         }
@@ -71,7 +75,7 @@ fun Home(modifier: Modifier, viewModel: MyViewModel) {
 }
 
 @Composable
-fun CustomCard(modifier: Modifier, name: String, value: State<Int>) {
+fun CustomCard(modifier: Modifier, name: String, value: State<Double>, unit: String) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
@@ -87,7 +91,7 @@ fun CustomCard(modifier: Modifier, name: String, value: State<Int>) {
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = value.value.toString(), modifier = modifier
+            text = value.value.toString() + unit, modifier = modifier
                 .padding(16.dp)
                 .align(Alignment.CenterHorizontally), textAlign = TextAlign.Center
         )
