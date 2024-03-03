@@ -1,8 +1,7 @@
 package fi.metropolia.untop.sensorproject
 
 import android.graphics.PorterDuff
-import android.os.Build
-import androidx.annotation.RequiresApi
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
@@ -39,14 +38,9 @@ import com.patrykandpatrick.vico.core.component.shape.shader.TopBottomShader
 import com.patrykandpatrick.vico.core.marker.Marker
 import com.patrykandpatrick.vico.core.model.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.model.lineSeries
-import fi.metropolia.untop.sensorproject.graphs.ComposeChart1
-import fi.metropolia.untop.sensorproject.graphs.ComposeChart3
-import fi.metropolia.untop.sensorproject.graphs.ComposeChart4
-import fi.metropolia.untop.sensorproject.graphs.ComposeChart7
-import fi.metropolia.untop.sensorproject.graphs.ComposeChart8
-import fi.metropolia.untop.sensorproject.graphs.ComposeChart9
+import java.math.RoundingMode
+import java.text.DecimalFormat
 
-@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
     val valueList = remember { mutableStateListOf<Number>() }
@@ -59,8 +53,9 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
     val data = when (name) {
         "Temperature" -> viewModel.ambientTemp.observeAsState(initial = 0).value
         "Humidity" -> viewModel.humidity.observeAsState(initial = 0).value
+        "Ambient air pressure" -> viewModel.pressure.observeAsState(initial = 0).value
         //Pitää vielä säätää oikein, sitte ko tietää mitä näytetään🐨
-        else -> viewModel.pressure.observeAsState(initial = 0).value
+        else -> viewModel.light.observeAsState(initial = 0).value
     }
 
     LaunchedEffect(data) {
@@ -70,7 +65,9 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
     }
 
     Column(modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = data.toString())
+        val df = DecimalFormat("#.##")
+        df.roundingMode = RoundingMode.CEILING
+        Text(text = df.format(data))
         CartesianChartHost(
             rememberCartesianChart(
                 rememberLineCartesianLayer(
@@ -87,7 +84,7 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
                                         component =
                                         rememberShapeComponent(
                                             shape = Shapes.pillShape,
-                                            color = Color.Blue,
+                                            color = Color.Red,
                                             margins = remember { dimensionsOf(1.dp) },
                                         ),
                                     ),
@@ -122,7 +119,7 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
                 ),
                 startAxis = rememberStartAxis(
                     label = rememberTextComponent(
-                        color = Color.Blue,
+                        color = if (isSystemInDarkTheme()) Color.White else Color.Blue,
                     ), itemPlacer = remember {
                         AxisItemPlacer.Vertical.default(maxItemCount = { 5 })
                     }),
@@ -134,12 +131,12 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
         Column(
             modifier.verticalScroll(rememberScrollState())
         ) {
-            ComposeChart1(modelProducer = modelProducer)
+            /*ComposeChart1(modelProducer = modelProducer)
             ComposeChart3(modelProducer = modelProducer)
             ComposeChart4(modelProducer = modelProducer)
             ComposeChart7(modelProducer = modelProducer)
             ComposeChart8(modelProducer = modelProducer)
-            ComposeChart9(modelProducer = modelProducer)
+            ComposeChart9(modelProducer = modelProducer)*/
         }
 
     }
@@ -173,7 +170,6 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
             modelProducer = modelProducer,
             marker = rememberMarker(),
         )*/
-@RequiresApi(Build.VERSION_CODES.Q)
 @Preview
 @Composable
 private fun GraphTest() {

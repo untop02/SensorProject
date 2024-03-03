@@ -24,6 +24,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import java.math.RoundingMode
+import java.text.DecimalFormat
 
 @Composable
 fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostController) {
@@ -92,6 +94,8 @@ fun CustomCard(
     navController: NavHostController,
     unit: String
 ) {
+    val df = DecimalFormat("#.##")
+    df.roundingMode = RoundingMode.CEILING
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
@@ -109,7 +113,7 @@ fun CustomCard(
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = value.value.toString() + unit, modifier = modifier
+            text = df.format(value.value) + unit, modifier = modifier
                 .padding(16.dp)
                 .align(Alignment.CenterHorizontally), textAlign = TextAlign.Center
         )
