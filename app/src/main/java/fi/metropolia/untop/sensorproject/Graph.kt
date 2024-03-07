@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +39,9 @@ import com.patrykandpatrick.vico.core.component.shape.shader.TopBottomShader
 import com.patrykandpatrick.vico.core.marker.Marker
 import com.patrykandpatrick.vico.core.model.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.model.lineSeries
+import fi.metropolia.untop.sensorproject.data.MyViewModel
+import fi.metropolia.untop.sensorproject.data.OfflineRepo
+import fi.metropolia.untop.sensorproject.data.SensorDatabase
 import java.math.RoundingMode
 import java.text.DecimalFormat
 
@@ -173,5 +177,7 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
 @Preview
 @Composable
 private fun GraphTest() {
-    Graph(modifier = Modifier, viewModel = MyViewModel(), name = "Temperature")
+    val context = LocalContext.current
+    val sensorDatabase = SensorDatabase.getDatabase(context)
+    Graph(modifier = Modifier, viewModel = MyViewModel(OfflineRepo(sensorDatabase.itemDao())), name = "Temperature")
 }

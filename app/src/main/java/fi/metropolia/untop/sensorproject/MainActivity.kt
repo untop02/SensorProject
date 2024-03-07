@@ -11,7 +11,6 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
@@ -31,26 +30,48 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import fi.metropolia.untop.sensorproject.data.MyViewModel
+import fi.metropolia.untop.sensorproject.data.OfflineRepo
+import fi.metropolia.untop.sensorproject.data.SensorDatabase
 import fi.metropolia.untop.sensorproject.ui.theme.SensorProjectTheme
+import java.time.LocalDateTime
+
 
 class MainActivity : ComponentActivity(), SensorEventListener {
-    private val viewModel: MyViewModel by viewModels()
     private lateinit var mSensorManager: SensorManager
+    private lateinit var sensorDatabase: SensorDatabase
+    private lateinit var viewModel: MyViewModel
     private var mTemp: Sensor? = null
     private var mLight: Sensor? = null
     private var mPressure: Sensor? = null
     private var mHumidity: Sensor? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sensorDatabase = SensorDatabase.getDatabase(this)
+        viewModel = MyViewModel(OfflineRepo(sensorDatabase.itemDao()))
+        viewModel.getAll()
         mSensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mTemp = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
         mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
         mPressure = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE)
         mHumidity = mSensorManager.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY)
-        Log.d("DBG", "All available Ambient Temp sensors ${mSensorManager.getSensorList(Sensor.TYPE_AMBIENT_TEMPERATURE)}")
-        Log.d("DBG", "All available Light sensors ${mSensorManager.getSensorList(Sensor.TYPE_LIGHT)}")
-        Log.d("DBG", "All available Pressure sensors: ${mSensorManager.getSensorList(Sensor.TYPE_PRESSURE)}")
-        Log.d("DBG", "All available Humidity sensors: ${mSensorManager.getSensorList(Sensor.TYPE_RELATIVE_HUMIDITY)}")
+        Log.d(
+            "DBG",
+            "All available Ambient Temp sensors ${mSensorManager.getSensorList(Sensor.TYPE_AMBIENT_TEMPERATURE)}"
+        )
+        Log.d(
+            "DBG",
+            "All available Light sensors ${mSensorManager.getSensorList(Sensor.TYPE_LIGHT)}"
+        )
+        Log.d(
+            "DBG",
+            "All available Pressure sensors: ${mSensorManager.getSensorList(Sensor.TYPE_PRESSURE)}"
+        )
+        Log.d(
+            "DBG",
+            "All available Humidity sensors: ${mSensorManager.getSensorList(Sensor.TYPE_RELATIVE_HUMIDITY)}"
+        )
+        Log.d("DBG", LocalDateTime.now().toString())
         /*
                 viewModel.makeTestData(viewModel.ambientTemp)
                 viewModel.makeTestData(viewModel.humidity)
@@ -87,6 +108,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
                     Scaffold(
+                        floatingActionButton = {
+                        },
                         bottomBar = {
                             BottomAppBar(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,

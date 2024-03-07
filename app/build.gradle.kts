@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -77,6 +78,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
     implementation("io.coil-kt:coil:2.6.0")
 
+    //VICO
     implementation("com.patrykandpatrick.vico:compose:2.0.0-alpha.8")
 
     // For `compose`. Creates a `ChartStyle` based on an M2 Material Theme.
@@ -87,4 +89,9 @@ dependencies {
 
     // Houses the core logic for charts and other elements. Included in all other modules.
     implementation("com.patrykandpatrick.vico:core:2.0.0-alpha.8")
+
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation ("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
+
 }

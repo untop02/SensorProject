@@ -24,6 +24,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import fi.metropolia.untop.sensorproject.data.MyViewModel
+import fi.metropolia.untop.sensorproject.data.OfflineRepo
+import fi.metropolia.untop.sensorproject.data.SensorDatabase
 import java.math.RoundingMode
 import java.text.DecimalFormat
 
@@ -123,6 +126,8 @@ fun CustomCard(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun HomePrev() {
+    val context = LocalContext.current
+    val sensorDatabase = SensorDatabase.getDatabase(context)
     val navController = rememberNavController()
-    Home(modifier = Modifier, viewModel = MyViewModel(), navController = navController)
+    Home(modifier = Modifier, viewModel = MyViewModel(OfflineRepo(sensorDatabase.itemDao())), navController = navController)
 }
