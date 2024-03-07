@@ -30,9 +30,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val serverResp = repository.getWeather(lat, long)
-                Log.d("DBG", serverResp.toString())
                 weatherData.postValue(serverResp)
-
             } catch (e: Exception) {
                 println(e.stackTrace)
             }
@@ -41,11 +39,13 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
 
     fun insertItem(item: Item) {
         viewModelScope.launch {
-            Log.d("DBG", "Before insertItem")
-            sensorRepository.insertItem(item)
-            Log.d("DBG", "After insertItem")
-            sensorRepository.getAll()
-            Log.d("DBG", "After getAll")
+            try {
+                // Insert item in a transaction
+                sensorRepository.insertItem(item)
+            } catch (e: Exception) {
+                Log.e("MyViewModel", "Error inserting item: ${e.message}")
+            }
+            getAll()
         }
     }
 
@@ -53,23 +53,23 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
     fun updateItem(item: Item) {
         viewModelScope.launch {
             sensorRepository.updateItem(item)
-            sensorRepository.getAll()
         }
     }
 
     fun deleteItem(item: Item) {
         viewModelScope.launch {
             sensorRepository.deleteItem(item)
-            sensorRepository.getAll()
         }
     }
 
     fun getAll() {
-        Log.d("DBG", "Starting getALl")
         viewModelScope.launch {
-            // Fetch all items from the repository
-            history.value = sensorRepository.getAll().toMutableList()
-
+            try {
+                val data = sensorRepository.getAll()
+                history.postValue(data)
+            } catch (e: Exception) {
+                Log.e("MyViewModel", "Error getting items: ${e.message}")
+            }
         }
     }
 

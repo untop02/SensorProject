@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -50,8 +51,10 @@ import fi.metropolia.untop.sensorproject.ui.theme.Pink40
 
 @Composable
 fun History(modifier: Modifier, viewModel: MyViewModel, navController: NavHostController) {
-    viewModel.getAll()
-    val history by viewModel.history.observeAsState()
+    LaunchedEffect(Unit) {
+        viewModel.getAll()
+    }
+    val history by viewModel.history.observeAsState(emptyList())
     val colors = listOf(Color.Green, Color.Cyan, Color.Red, Pink40)
     val currentFontSizePx = with(LocalDensity.current) { 70.dp.toPx() }
     val currentFontSizeDoublePx = currentFontSizePx * 2
@@ -90,10 +93,8 @@ fun History(modifier: Modifier, viewModel: MyViewModel, navController: NavHostCo
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(15.dp)
             ) {
-                history?.let {
-                    items(it.toMutableList()) { item ->
-                        ListItem(modifier, item, navController)
-                    }
+                items(history) { item ->
+                    ListItem(modifier, item, navController)
                 }
             }
             Weather(modifier = modifier, context = LocalContext.current, viewModel = viewModel)

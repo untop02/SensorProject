@@ -17,10 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import fi.metropolia.untop.sensorproject.data.Item
 import fi.metropolia.untop.sensorproject.data.MyViewModel
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
@@ -34,15 +31,6 @@ fun Weather(modifier: Modifier, context: Context, viewModel: MyViewModel) {
     ) {
         Text(text = viewModel.weatherData.observeAsState().value.toString())
         ElevatedButton(onClick = {
-            val newItem = Item(
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")),
-                viewModel.ambientTemp.value ?: 0.0,
-                viewModel.humidity.value ?: 0.0,
-                viewModel.pressure.value ?: 0.0,
-                viewModel.light.value ?: 0.0
-            )
-            viewModel.insertItem(newItem)
-            Log.d("DBG", viewModel.history.value?.size.toString())
             getLocation(
                 context = context,
                 onGetLastLocationSuccess = { location ->

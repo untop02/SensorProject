@@ -1,5 +1,6 @@
 package fi.metropolia.untop.sensorproject.data
 
+
 interface SensorRepository {
 
     suspend fun insertItem(item: Item)

@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
@@ -30,11 +31,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import fi.metropolia.untop.sensorproject.data.Item
 import fi.metropolia.untop.sensorproject.data.MyViewModel
 import fi.metropolia.untop.sensorproject.data.OfflineRepo
 import fi.metropolia.untop.sensorproject.data.SensorDatabase
 import fi.metropolia.untop.sensorproject.ui.theme.SensorProjectTheme
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 class MainActivity : ComponentActivity(), SensorEventListener {
@@ -108,6 +111,20 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                 ) {
                     Scaffold(
                         floatingActionButton = {
+                            FloatingActionButton(onClick = {
+                                val newItem = Item(
+                                    LocalDateTime.now()
+                                        .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")),
+                                    viewModel.ambientTemp.value ?: 0.0,
+                                    viewModel.humidity.value ?: 0.0,
+                                    viewModel.pressure.value ?: 0.0,
+                                    viewModel.light.value ?: 0.0
+                                )
+                                viewModel.insertItem(newItem)
+                                Log.d("DBG", viewModel.history.value?.size.toString())
+                            }) {
+                                Text(text = "Press")
+                            }
                         },
                         bottomBar = {
                             BottomAppBar(
