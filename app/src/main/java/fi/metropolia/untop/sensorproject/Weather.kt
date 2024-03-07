@@ -42,7 +42,7 @@ fun Weather(modifier: Modifier, context: Context, viewModel: MyViewModel) {
                 viewModel.light.value ?: 0.0
             )
             viewModel.insertItem(newItem)
-
+            Log.d("DBG", viewModel.history.value?.size.toString())
             getLocation(
                 context = context,
                 onGetLastLocationSuccess = { location ->

@@ -32,7 +32,6 @@ import java.text.DecimalFormat
 
 @Composable
 fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostController) {
-    val context = LocalContext.current
     Box(
         modifier = Modifier
             .fillMaxSize(),
@@ -84,7 +83,7 @@ fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostContr
                     unit = " lx"
                 )
             }
-            Weather(modifier = Modifier, context = context, viewModel = viewModel)
+            Weather(modifier = Modifier, context = LocalContext.current, viewModel = viewModel)
         }
     }
 }

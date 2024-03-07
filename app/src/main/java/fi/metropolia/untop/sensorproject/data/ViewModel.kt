@@ -18,7 +18,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
     val light = MutableLiveData(0.0)
     val pressure = MutableLiveData(0.0)
     val weatherData = MutableLiveData<WeatherResponse>()
-    var history = MutableLiveData<Unit>()
+    var history = MutableLiveData<List<Item>>(emptyList())
 
     class WeatherRepository {
         suspend fun getWeather(lat: Double, long: Double): WeatherResponse {
@@ -41,29 +41,38 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
 
     fun insertItem(item: Item) {
         viewModelScope.launch {
+            Log.d("DBG", "Before insertItem")
             sensorRepository.insertItem(item)
+            Log.d("DBG", "After insertItem")
+            sensorRepository.getAll()
+            Log.d("DBG", "After getAll")
         }
     }
+
 
     fun updateItem(item: Item) {
         viewModelScope.launch {
             sensorRepository.updateItem(item)
+            sensorRepository.getAll()
         }
     }
 
     fun deleteItem(item: Item) {
         viewModelScope.launch {
             sensorRepository.deleteItem(item)
+            sensorRepository.getAll()
         }
     }
 
     fun getAll() {
+        Log.d("DBG", "Starting getALl")
         viewModelScope.launch {
-            val history = sensorRepository.getAll()
-            Log.d("DBG", history.toString())
+            // Fetch all items from the repository
+            history.value = sensorRepository.getAll().toMutableList()
 
         }
     }
+
 
     fun makeTestData(testData: MutableLiveData<Double>) {
         viewModelScope.launch(Dispatchers.IO) {

@@ -49,7 +49,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
         sensorDatabase = SensorDatabase.getDatabase(this)
         viewModel = MyViewModel(OfflineRepo(sensorDatabase.itemDao()))
-        viewModel.getAll()
         mSensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mTemp = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
         mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
@@ -152,7 +151,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                                 Home(modifier = Modifier, viewModel, navController)
                             }
                             composable(Destinations.History.route) {
-                                History(modifier = Modifier)
+                                History(modifier = Modifier, viewModel)
                             }
                             composable(Destinations.Settings.route) {
                                 Settings(modifier = Modifier)

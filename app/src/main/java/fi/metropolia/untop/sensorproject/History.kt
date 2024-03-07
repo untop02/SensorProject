@@ -23,6 +23,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,6 +32,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -38,10 +40,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import fi.metropolia.untop.sensorproject.data.Item
+import fi.metropolia.untop.sensorproject.data.MyViewModel
+import fi.metropolia.untop.sensorproject.data.OfflineRepo
+import fi.metropolia.untop.sensorproject.data.SensorDatabase
 import fi.metropolia.untop.sensorproject.ui.theme.Pink40
 
 @Composable
-fun History(modifier: Modifier) {
+fun History(modifier: Modifier, viewModel: MyViewModel) {
+    viewModel.getAll()
+    val history by viewModel.history.observeAsState()
     val colors = listOf(Color.Green, Color.Cyan, Color.Red, Pink40)
     val currentFontSizePx = with(LocalDensity.current) { 70.dp.toPx() }
     val currentFontSizeDoublePx = currentFontSizePx * 2
@@ -51,28 +59,6 @@ fun History(modifier: Modifier) {
         initialValue = 0f,
         targetValue = currentFontSizeDoublePx,
         animationSpec = infiniteRepeatable(tween(1000, easing = LinearEasing)), label = ""
-    )
-    val list = arrayListOf(
-        "Test 1",
-        "Test 2",
-        "Test 3",
-        "Test 4",
-        "Test 5",
-        "Test 6",
-        "Test 7",
-        "Test 8",
-        "Test 9",
-        "Test 10",
-        "Test 11",
-        "Test 12",
-        "Test 13",
-        "Test 14",
-        "Test 15",
-        "Test 16",
-        "Test 17",
-        "Test 18",
-        "Test 19",
-        "Test 20"
     )
     Box(
         modifier = modifier
@@ -96,21 +82,25 @@ fun History(modifier: Modifier) {
                     )
                 )
             )
+            Text(text = history?.size.toString())
             LazyColumn(
                 modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(15.dp)
             ) {
-                items(list) { item ->
-                    ListItem(modifier, item = item)
+                history?.let {
+                    items(it.toMutableList()) { item ->
+                        ListItem(modifier, item = item)
+                    }
                 }
             }
+            Weather(modifier = modifier, context = LocalContext.current, viewModel = viewModel)
         }
     }
 }
 
 @Composable
-fun ListItem(modifier: Modifier, item: String) {
+fun ListItem(modifier: Modifier, item: Item) {
     Card(modifier.fillMaxWidth()) {
         Row {
             Image(
@@ -128,7 +118,7 @@ fun ListItem(modifier: Modifier, item: String) {
                     .align(Alignment.CenterVertically)
                     .padding(start = 5.dp)
             ) {
-                Text(text = item)
+                Text(text = item.date)
                 Text(text = "Subtext")
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -147,11 +137,13 @@ fun ListItem(modifier: Modifier, item: String) {
 @Preview
 @Composable
 fun ListItemPrev() {
-    ListItem(modifier = Modifier, item = "Test")
+    ListItem(modifier = Modifier, item = Item("12", 1.2, 1.2, 1.2, 1.2))
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ListPrev() {
-    History(modifier = Modifier)
+    val context = LocalContext.current
+    val sensorDatabase = SensorDatabase.getDatabase(context)
+    History(modifier = Modifier, viewModel = MyViewModel(OfflineRepo(sensorDatabase.itemDao())))
 }
