@@ -40,6 +40,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import fi.metropolia.untop.sensorproject.data.Item
 import fi.metropolia.untop.sensorproject.data.MyViewModel
 import fi.metropolia.untop.sensorproject.data.OfflineRepo
@@ -47,7 +49,7 @@ import fi.metropolia.untop.sensorproject.data.SensorDatabase
 import fi.metropolia.untop.sensorproject.ui.theme.Pink40
 
 @Composable
-fun History(modifier: Modifier, viewModel: MyViewModel) {
+fun History(modifier: Modifier, viewModel: MyViewModel, navController: NavHostController) {
     viewModel.getAll()
     val history by viewModel.history.observeAsState()
     val colors = listOf(Color.Green, Color.Cyan, Color.Red, Pink40)
@@ -90,7 +92,7 @@ fun History(modifier: Modifier, viewModel: MyViewModel) {
             ) {
                 history?.let {
                     items(it.toMutableList()) { item ->
-                        ListItem(modifier, item = item)
+                        ListItem(modifier, item, navController)
                     }
                 }
             }
@@ -100,8 +102,11 @@ fun History(modifier: Modifier, viewModel: MyViewModel) {
 }
 
 @Composable
-fun ListItem(modifier: Modifier, item: Item) {
-    Card(modifier.fillMaxWidth()) {
+fun ListItem(modifier: Modifier, item: Item, navController: NavHostController) {
+    Card(
+        modifier
+            .fillMaxWidth()
+    ) {
         Row {
             Image(
                 painter = painterResource(id = R.drawable.cage),
@@ -137,13 +142,23 @@ fun ListItem(modifier: Modifier, item: Item) {
 @Preview
 @Composable
 fun ListItemPrev() {
-    ListItem(modifier = Modifier, item = Item("12", 1.2, 1.2, 1.2, 1.2))
+    val navController = rememberNavController()
+    ListItem(
+        modifier = Modifier,
+        item = Item("12", 1.2, 1.2, 1.2, 1.2),
+        navController = navController
+    )
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ListPrev() {
+    val navController = rememberNavController()
     val context = LocalContext.current
     val sensorDatabase = SensorDatabase.getDatabase(context)
-    History(modifier = Modifier, viewModel = MyViewModel(OfflineRepo(sensorDatabase.itemDao())))
+    History(
+        modifier = Modifier,
+        viewModel = MyViewModel(OfflineRepo(sensorDatabase.itemDao())),
+        navController = navController
+    )
 }

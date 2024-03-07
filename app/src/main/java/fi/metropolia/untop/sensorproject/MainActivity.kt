@@ -151,7 +151,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                                 Home(modifier = Modifier, viewModel, navController)
                             }
                             composable(Destinations.History.route) {
-                                History(modifier = Modifier, viewModel)
+                                History(modifier = Modifier, viewModel, navController)
                             }
                             composable(Destinations.Settings.route) {
                                 Settings(modifier = Modifier)
