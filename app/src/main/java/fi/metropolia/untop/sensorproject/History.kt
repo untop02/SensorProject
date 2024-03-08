@@ -52,7 +52,7 @@ import fi.metropolia.untop.sensorproject.ui.theme.Pink40
 @Composable
 fun History(modifier: Modifier, viewModel: MyViewModel, navController: NavHostController) {
     LaunchedEffect(Unit) {
-        viewModel.getAll()
+        viewModel.getAllItems()
     }
     val history by viewModel.history.observeAsState(emptyList())
     val colors = listOf(Color.Green, Color.Cyan, Color.Red, Pink40)
@@ -159,7 +159,7 @@ fun ListPrev() {
     val sensorDatabase = SensorDatabase.getDatabase(context)
     History(
         modifier = Modifier,
-        viewModel = MyViewModel(OfflineRepo(sensorDatabase.itemDao())),
+        viewModel = MyViewModel(OfflineRepo(sensorDatabase.itemDao(), sensorDatabase.settingsDao())),
         navController = navController
     )
 }

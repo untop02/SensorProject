@@ -2,6 +2,7 @@ package fi.metropolia.untop.sensorproject
 
 import android.Manifest
 import android.content.Context
+import android.content.res.Configuration
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -35,6 +36,7 @@ import fi.metropolia.untop.sensorproject.data.Item
 import fi.metropolia.untop.sensorproject.data.MyViewModel
 import fi.metropolia.untop.sensorproject.data.OfflineRepo
 import fi.metropolia.untop.sensorproject.data.SensorDatabase
+import fi.metropolia.untop.sensorproject.data.Setting
 import fi.metropolia.untop.sensorproject.ui.theme.SensorProjectTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -42,7 +44,7 @@ import java.time.format.DateTimeFormatter
 
 class MainActivity : ComponentActivity(), SensorEventListener {
     private lateinit var mSensorManager: SensorManager
-    private lateinit var sensorDatabase: SensorDatabase
+    private lateinit var database: SensorDatabase
     private lateinit var viewModel: MyViewModel
     private var mTemp: Sensor? = null
     private var mLight: Sensor? = null
@@ -50,8 +52,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var mHumidity: Sensor? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        sensorDatabase = SensorDatabase.getDatabase(this)
-        viewModel = MyViewModel(OfflineRepo(sensorDatabase.itemDao()))
+        database = SensorDatabase.getDatabase(this)
+        viewModel = MyViewModel(OfflineRepo(database.itemDao(), database.settingsDao()))
         mSensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mTemp = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
         mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
@@ -80,6 +82,16 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                 viewModel.makeTestData(viewModel.light)
                 viewModel.makeTestData(viewModel.pressure)
         */
+        for (setting in viewModel.settings) {
+            viewModel.insertSetting(
+                Setting(
+                    setting.name,
+                    setting.description,
+                    setting.currentValue
+                )
+            )
+        }
+
         val requiredPermissions: Array<String> = arrayOf(
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN,
@@ -103,9 +115,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             }
         requestPermissionsLauncher.launch(requiredPermissions)
         setContent {
+            isDarkModeOn()
             val navController = rememberNavController()
             var navigationSelectedItem by rememberSaveable { mutableIntStateOf(0) }
-            SensorProjectTheme {
+            SensorProjectTheme(darkTheme = isDarkModeOn()) {
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
@@ -121,7 +134,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                                     viewModel.light.value ?: 0.0
                                 )
                                 viewModel.insertItem(newItem)
-                                Log.d("DBG", viewModel.history.value?.size.toString())
                             }) {
                                 Text(text = "Press")
                             }
@@ -171,7 +183,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                                 History(modifier = Modifier, viewModel, navController)
                             }
                             composable(Destinations.Settings.route) {
-                                Settings(modifier = Modifier)
+                                Settings(modifier = Modifier, viewModel)
                             }
                             composable(
                                 Destinations.Graph.route.plus("?observedName={observedName}"),
@@ -190,7 +202,11 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             }
         }
     }
-
+    private fun isDarkModeOn(): Boolean {
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        //viewModel.updateSetting(Setting("Theme","Change application theme", if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) 1 else 0))
+        return currentNightMode == Configuration.UI_MODE_NIGHT_YES
+    }
     override fun onResume() {
         super.onResume()
         mSensorManager.registerListener(this, mTemp, SensorManager.SENSOR_DELAY_NORMAL)

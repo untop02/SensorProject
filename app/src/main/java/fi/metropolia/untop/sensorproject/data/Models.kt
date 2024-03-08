@@ -14,6 +14,14 @@ data class Item(
     val pressure: Double,
     val illuminance: Double
 )
+
+@Entity(tableName = "settings")
+data class Setting(
+    @PrimaryKey
+    val name: String,
+    val description: String,
+    var value: Int
+)
 class LocalTimeConverter {
     @TypeConverter
     fun fromLocalTime(value: LocalTime): String {

@@ -24,3 +24,16 @@ interface SensorDao {
     //Tietystä ajasta tiettyyn
     //@Query("SELECT * FROM items WHERE ")
 }
+
+@Dao
+interface SettingsDao {
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insert(setting: Setting)
+    @Update
+    suspend fun update(setting: Setting)
+    @Query("SELECT * FROM settings WHERE name = :name")
+    suspend fun getSetting(name: String): Setting
+
+    @Query("SELECT * FROM settings")
+    suspend fun getALL(): List<Setting>
+}

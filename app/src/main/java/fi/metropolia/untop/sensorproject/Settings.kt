@@ -1,5 +1,6 @@
 package fi.metropolia.untop.sensorproject
 
+import android.util.Log
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -35,15 +36,37 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import fi.metropolia.untop.sensorproject.data.MyViewModel
+import fi.metropolia.untop.sensorproject.data.OfflineRepo
+import fi.metropolia.untop.sensorproject.data.SensorDatabase
 import fi.metropolia.untop.sensorproject.ui.theme.Pink40
+import java.util.Locale
 
 @Composable
-fun Settings(modifier: Modifier) {
+fun Settings(modifier: Modifier, viewModel: MyViewModel) {
+    Log.d("DBG", Locale.getDefault().language)
+    Column(modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
+        viewModel.settings.forEach() { setting ->
+            SettingItem(modifier, setting, viewModel)
+            Spacer(modifier.padding(5.dp))
+        }
+    }
+}
+
+data class SettingModel(
+    val name: String,
+    val description: String,
+    var currentValue: Int = 0
+)
+
+@Composable
+fun SettingItem(modifier: Modifier, setting: SettingModel, viewModel: MyViewModel) {
     val colors = listOf(Color.Green, Color.Cyan, Color.Red, Pink40)
     val currentFontSizePx = with(LocalDensity.current) { 50.dp.toPx() }
     val currentFontSizeDoublePx = currentFontSizePx * 2
@@ -53,92 +76,87 @@ fun Settings(modifier: Modifier) {
         targetValue = currentFontSizeDoublePx,
         animationSpec = infiniteRepeatable(tween(1000, easing = LinearEasing)), label = ""
     )
-    Column(modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)) {
-        repeat(4) {
-            var checked by rememberSaveable { mutableStateOf(false) }
-            ElevatedCard(
-                Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(
-                    defaultElevation = 6.dp
-                )
+    var checked by rememberSaveable { mutableStateOf(setting.currentValue == 1) }
+    ElevatedCard(
+        Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 6.dp
+        )
+    ) {
+        Row(
+            Modifier.clip(shape = RoundedCornerShape(500.dp))
+        ) {
+            Image(
+                imageVector = Icons.Rounded.Build,
+                contentDescription = "Setting",
+                contentScale = ContentScale.Crop,
+                modifier = modifier
+                    .padding(8.dp)
+                    .width(50.dp)
+                    .height(50.dp)
+                    .clip(RoundedCornerShape(50.dp))
+            )
+            Column(
+                modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(start = 5.dp)
             ) {
-                Row(
-                    Modifier.clip(shape = RoundedCornerShape(500.dp))
-                ) {
-                    Image(
-                        imageVector = Icons.Rounded.Build,
-                        contentDescription = "Setting",
-                        contentScale = ContentScale.Crop,
-                        modifier = modifier
-                            .padding(8.dp)
-                            .width(50.dp)
-                            .height(50.dp)
-                            .clip(RoundedCornerShape(50.dp))
-                    )
-                    Column(
-                        modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(start = 5.dp)
-                    ) {
-                        Text(
-                            text = "Setting",
-                            fontWeight = FontWeight.Black,
-                            style = if (checked) {
-                                TextStyle(
-                                    Brush.linearGradient(
-                                        colors = colors,
-                                        start = Offset(offset, offset),
-                                        end = Offset(
-                                            offset + currentFontSizePx,
-                                            offset + currentFontSizePx
-                                        ),
-                                        tileMode = TileMode.Mirror
-                                    )
-                                )
-                            } else {
-                                TextStyle()
-                            }
+                Text(
+                    text = setting.name,
+                    fontWeight = FontWeight.Black,
+                    style = if (checked) {
+                        TextStyle(
+                            Brush.linearGradient(
+                                colors = colors,
+                                start = Offset(offset, offset),
+                                end = Offset(
+                                    offset + currentFontSizePx,
+                                    offset + currentFontSizePx
+                                ),
+                                tileMode = TileMode.Mirror
+                            )
                         )
-                        Text(
-                            text = "Setting Description",
-                            style = if (checked) {
-                                TextStyle(
-                                    Brush.linearGradient(
-                                        colors = colors,
-                                        start = Offset(offset, offset),
-                                        end = Offset(
-                                            offset + currentFontSizePx,
-                                            offset + currentFontSizePx
-                                        ),
-                                        tileMode = TileMode.Mirror
-                                    )
-                                )
-                            } else {
-                                TextStyle()
-                            }
+                    } else {
+                        TextStyle()
+                    }
+                )
+                Text(
+                    text = setting.description,
+                    style = if (checked) {
+                        TextStyle(
+                            Brush.linearGradient(
+                                colors = colors,
+                                start = Offset(offset, offset),
+                                end = Offset(
+                                    offset + currentFontSizePx,
+                                    offset + currentFontSizePx
+                                ),
+                                tileMode = TileMode.Mirror
+                            )
+                        )
+                    } else {
+                        TextStyle()
+                    }
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            Switch(
+                checked = checked,
+                onCheckedChange = {
+                    checked = it
+                },
+                modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(end = 5.dp),
+                thumbContent = {
+                    if (checked) {
+                        Icon(
+                            imageVector = Icons.Outlined.Check,
+                            contentDescription = null
                         )
                     }
-                    Spacer(modifier = Modifier.weight(1f))
-                    Switch(
-                        checked = checked,
-                        onCheckedChange = {
-                            checked = it
-                        },
-                        modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(end = 5.dp),
-                        thumbContent = {
-                            if (checked) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Check,
-                                    contentDescription = null
-                                )
-                            }
-                        }
-                    )
                 }
-            }
-            Spacer(modifier.padding(5.dp))
+            )
         }
     }
 }
@@ -146,5 +164,14 @@ fun Settings(modifier: Modifier) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SettingsPrev() {
-    Settings(modifier = Modifier)
+    val context = LocalContext.current
+    val sensorDatabase = SensorDatabase.getDatabase(context)
+    Settings(
+        modifier = Modifier, viewModel = MyViewModel(
+            OfflineRepo(
+                sensorDatabase.itemDao(),
+                sensorDatabase.settingsDao()
+            )
+        )
+    )
 }

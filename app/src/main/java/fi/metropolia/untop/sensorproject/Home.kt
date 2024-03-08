@@ -128,5 +128,8 @@ fun HomePrev() {
     val context = LocalContext.current
     val sensorDatabase = SensorDatabase.getDatabase(context)
     val navController = rememberNavController()
-    Home(modifier = Modifier, viewModel = MyViewModel(OfflineRepo(sensorDatabase.itemDao())), navController = navController)
+    Home(modifier = Modifier, viewModel = MyViewModel(OfflineRepo(
+        sensorDatabase.itemDao(),
+        sensorDatabase.settingsDao()
+    )), navController = navController)
 }

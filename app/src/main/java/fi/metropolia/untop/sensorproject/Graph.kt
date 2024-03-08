@@ -177,7 +177,9 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
 @Preview
 @Composable
 private fun GraphTest() {
-    val context = LocalContext.current
-    val sensorDatabase = SensorDatabase.getDatabase(context)
-    Graph(modifier = Modifier, viewModel = MyViewModel(OfflineRepo(sensorDatabase.itemDao())), name = "Temperature")
+    val sensorDatabase = SensorDatabase.getDatabase(LocalContext.current)
+    Graph(modifier = Modifier, viewModel = MyViewModel(OfflineRepo(
+        sensorDatabase.itemDao(),
+        sensorDatabase.settingsDao()
+    )), name = "Temperature")
 }

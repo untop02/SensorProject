@@ -4,11 +4,13 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import fi.metropolia.untop.sensorproject.SettingModel
 import fi.metropolia.untop.sensorproject.api.RetrofitInstance
 import fi.metropolia.untop.sensorproject.api.WeatherResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.Thread.sleep
+import java.util.Locale
 import java.util.concurrent.ThreadLocalRandom
 
 class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() {
@@ -19,6 +21,20 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
     val pressure = MutableLiveData(0.0)
     val weatherData = MutableLiveData<WeatherResponse>()
     var history = MutableLiveData<List<Item>>(emptyList())
+    var theme = MutableLiveData(false)
+    //Settings
+    val settings = listOf(
+        SettingModel(
+            "Theme",
+            "Change application theme",
+            if (theme.value == true) 1 else 0
+        ),
+        SettingModel(
+            "Language",
+            "Change Language",
+            if (Locale.getDefault().language == "en") 1 else 0
+        )
+    )
 
     class WeatherRepository {
         suspend fun getWeather(lat: Double, long: Double): WeatherResponse {
@@ -45,7 +61,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
             } catch (e: Exception) {
                 Log.e("MyViewModel", "Error inserting item: ${e.message}")
             }
-            getAll()
+            getAllItems()
         }
     }
 
@@ -62,13 +78,50 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
         }
     }
 
-    fun getAll() {
+    fun insertSetting(setting: Setting) {
         viewModelScope.launch {
             try {
-                val data = sensorRepository.getAll()
+                // Insert item in a transaction
+                sensorRepository.insertSetting(setting)
+            } catch (e: Exception) {
+                Log.e("MyViewModel", "Error inserting item: ${e.message}")
+            }
+            getAllItems()
+        }
+    }
+    fun getAllItems() {
+        viewModelScope.launch {
+            try {
+                val data = sensorRepository.getAllItems()
                 history.postValue(data)
             } catch (e: Exception) {
                 Log.e("MyViewModel", "Error getting items: ${e.message}")
+            }
+        }
+    }
+
+    fun updateSetting(setting: Setting) {
+        viewModelScope.launch {
+            sensorRepository.updateSetting(setting)
+        }
+    }
+
+    fun getSetting(name: String) {
+        viewModelScope.launch {
+            try {
+                val setting = sensorRepository.getSetting(name)
+                theme.postValue(if (setting.value == 0) false else true)
+            }catch (e: Exception) {
+                Log.e("MyViewModel","Error getting setting: ${e.message}")
+            }
+        }
+    }
+    fun getAllSettings() {
+        viewModelScope.launch {
+            try {
+                val data = sensorRepository.getAllSettings()
+            } catch (e: Exception) {
+                Log.e("MyViewModel", "Error getting settings: ${e.message}")
             }
         }
     }
