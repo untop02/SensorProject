@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">SensorProject</string>
+    <string name="setting_name_automatic">Automatic</string>
+    <string name="setting_name_theme">Theme</string>
+    <string name="setting_name_language">Language</string>
+    <string name="setting_desc_automatic">Automatically change theme</string>
+    <string name="setting_desc_theme">Change application theme</string>
+    <string name="setting_desc_language">Change language</string>
+    <string name="menu_name_home">Home</string>
+    <string name="menu_name_history">History</string>
+    <string name="menu_name_settings">Settings</string>
+    <string name="home_name_temp">Temperature</string>
+    <string name="home_name_hum">Humidity</string>
+    <string name="home_name_pres">Pressure</string>
+    <string name="home_name_illum">Illuminance</string>
+    <string name="history_name">History</string>
 </resources>
