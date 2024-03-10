@@ -44,6 +44,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+
 class MainActivity : ComponentActivity(), SensorEventListener {
     private var mSensorManager: SensorManager? = null
     private var mTemp: Sensor? = null
@@ -61,9 +62,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             val navController = rememberNavController()
             var navigationSelectedItem by rememberSaveable { mutableIntStateOf(0) }
             LaunchedEffect(Unit) {
-                Log.d("DBG", "LaunchedEffect")
                 viewModel.getAllSettings()
-                Log.d("DBG","Theme is ${viewModel.theme.value}, Nightmode is ${viewModel.isNightMode.value}")
             }
             viewModel.theme.observeAsState().value?.let { it ->
                 SensorProjectTheme(darkTheme = it) {
@@ -209,6 +208,18 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         mLight = mSensorManager?.getDefaultSensor(Sensor.TYPE_LIGHT)
         mPressure = mSensorManager?.getDefaultSensor(Sensor.TYPE_PRESSURE)
         mHumidity = mSensorManager?.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY)
+
+        val sensors = mapOf(
+            Sensor.TYPE_AMBIENT_TEMPERATURE to "Temperature",
+            Sensor.TYPE_LIGHT to "Light",
+            Sensor.TYPE_PRESSURE to "Pressure",
+            Sensor.TYPE_RELATIVE_HUMIDITY to "Humidity"
+        )
+
+        val nullSensors = sensors.filter { (sensorType, _) ->
+            mSensorManager?.getDefaultSensor(sensorType) == null
+        }.map { (_, sensorName) -> sensorName }
+        viewModel.nullSensors.postValue(nullSensors)
     }
 
     override fun onResume() {

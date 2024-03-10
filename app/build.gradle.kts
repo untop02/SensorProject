@@ -20,7 +20,6 @@ android {
             useSupportLibrary = true
         }
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -74,7 +73,7 @@ dependencies {
     androidTestImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-    implementation("com.google.android.gms:play-services-location:21.1.0")
+    implementation("com.google.android.gms:play-services-location:21.2.0")
     implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
     implementation("io.coil-kt:coil:2.6.0")
 

@@ -17,12 +17,21 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.DrawModifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import fi.metropolia.untop.sensorproject.data.MyViewModel
@@ -34,57 +43,47 @@ import java.text.DecimalFormat
 @Composable
 fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostController) {
     Box(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Column(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .padding(top = 16.dp),
+                .padding(top = 16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Absolute.SpaceEvenly
-            ) {
-                CustomCard(
-                    modifier = modifier,
-                    name = stringResource(id = R.string.home_name_temp),
-                    value = viewModel.ambientTemp.observeAsState(0.0),
-                    navController = navController,
-                    unit = " °C"
-                )
-                CustomCard(
-                    modifier = modifier,
-                    name = stringResource(id = R.string.home_name_hum),
-                    value = viewModel.humidity.observeAsState(0.0),
-                    navController = navController,
-                    unit = " %"
-                )
+            val sensors = listOf(
+                SensorData(R.string.home_name_temp, "Temperature", viewModel.ambientTemp, " °C"),
+                SensorData(R.string.home_name_hum, "Humidity", viewModel.humidity, " %"),
+                SensorData(R.string.home_name_pres, "Pressure", viewModel.pressure, " hPa"),
+                SensorData(R.string.home_name_illum, "Illuminance", viewModel.light, " lx")
+            )
+
+            for (chunk in sensors.chunked(2)) {
+                SensorRow(chunk, navController, viewModel)
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                horizontalArrangement = Arrangement.Absolute.SpaceEvenly
-            ) {
-                CustomCard(
-                    modifier = modifier,
-                    name = stringResource(id = R.string.home_name_pres),
-                    value = viewModel.pressure.observeAsState(0.0),
-                    navController = navController,
-                    unit = " hPa"
-                )
-                CustomCard(
-                    modifier = modifier,
-                    name = stringResource(id = R.string.home_name_illum),
-                    value = viewModel.light.observeAsState(0.0),
-                    navController = navController,
-                    unit = " lx"
-                )
-            }
+
             Weather(modifier = Modifier, context = LocalContext.current, viewModel = viewModel)
+        }
+    }
+}
+
+@Composable
+fun SensorRow(sensors: List<SensorData>, navController: NavHostController, viewModel: MyViewModel) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 5.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        for (sensor in sensors) {
+            CustomCard(
+                modifier = if (viewModel.nullSensors.value?.contains(sensor.idName) == true) Modifier.disabled() else Modifier,
+                name = stringResource(id = sensor.nameResId),
+                value = sensor.value.observeAsState(0.0),
+                navController = navController,
+                unit = sensor.unit
+            )
         }
     }
 }
@@ -123,14 +122,44 @@ fun CustomCard(
     }
 }
 
+class GreyScaleModifier : DrawModifier {
+    override fun ContentDrawScope.draw() {
+        val saturationMatrix = ColorMatrix().apply { setToSaturation(0f) }
+        val saturationFilter = ColorFilter.colorMatrix(saturationMatrix)
+        val paint = Paint().apply {
+            colorFilter = saturationFilter
+        }
+        drawIntoCanvas {
+            it.saveLayer(Rect(0f, 0f, size.width, size.height), paint)
+            drawContent()
+            it.restore()
+        }
+    }
+}
+
+fun Modifier.disabled() = this
+    .then(GreyScaleModifier())
+    .then(alpha(0.4f))
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun HomePrev() {
     val context = LocalContext.current
     val sensorDatabase = SensorDatabase.getDatabase(context)
     val navController = rememberNavController()
-    Home(modifier = Modifier, viewModel = MyViewModel(OfflineRepo(
-        sensorDatabase.itemDao(),
-        sensorDatabase.settingsDao()
-    )), navController = navController)
+    Home(
+        modifier = Modifier, viewModel = MyViewModel(
+            OfflineRepo(
+                sensorDatabase.itemDao(),
+                sensorDatabase.settingsDao()
+            )
+        ), navController = navController
+    )
 }
+
+data class SensorData(
+    val nameResId: Int,
+    val idName: String,
+    val value: MutableLiveData<Double>,
+    val unit: String
+)

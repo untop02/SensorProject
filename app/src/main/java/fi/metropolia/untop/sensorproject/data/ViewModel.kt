@@ -23,6 +23,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
     var theme = MutableLiveData(false)
     private var automatic = MutableLiveData(true)
     var isNightMode = MutableLiveData(false)
+    var nullSensors = MutableLiveData<List<String>>(emptyList())
 
     class WeatherRepository {
         suspend fun getWeather(lat: Double, long: Double): WeatherResponse {
@@ -52,18 +53,6 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
         }
     }
 
-    fun updateItem(item: Item) {
-        viewModelScope.launch {
-            sensorRepository.updateItem(item)
-        }
-    }
-
-    fun deleteItem(item: Item) {
-        viewModelScope.launch {
-            sensorRepository.deleteItem(item)
-        }
-    }
-
     fun getAllItems() {
         viewModelScope.launch {
             try {
@@ -71,17 +60,6 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
                 history.postValue(data)
             } catch (e: Exception) {
                 Log.e("MyViewModel", "Error getting items: ${e.message}")
-            }
-        }
-    }
-
-    fun insertSetting(setting: Setting) {
-        viewModelScope.launch {
-            try {
-                Log.d("DBG", "Inserting ${setting.name}")
-                sensorRepository.insertSetting(setting)
-            } catch (e: Exception) {
-                Log.e("MyViewModel", "Error inserting setting: ${e.message}")
             }
         }
     }
@@ -97,33 +75,12 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
         }
     }
 
-    fun updateSetting(setting: Setting) {
-        viewModelScope.launch {
-            try {
-                sensorRepository.updateSetting(setting)
-
-            } catch (e: Exception) {
-                Log.e("MyViewModel", "Error updating setting ${e.message}")
-            }
-        }
-    }
-
     fun updateSettingValue(name: String, newValue: Boolean) {
         viewModelScope.launch {
             try {
-                sensorRepository.updateValue(name, newValue)
+                sensorRepository.updateSettingValue(name, newValue)
             } catch (e: Exception) {
                 Log.e("MyViewModel", "Error updating setting ${e.message}")
-            }
-        }
-    }
-
-    fun getSetting(settingName: String) {
-        viewModelScope.launch {
-            try {
-                val setting = sensorRepository.getSetting(settingName)
-            } catch (e: Exception) {
-                Log.e("MyViewModel", "Error getting setting: ${e.message}")
             }
         }
     }
@@ -141,15 +98,12 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
 
     private fun updateSettings(settings: List<Setting>) {
         automatic.postValue(settings[0].currentValue)
-
         val themeValue = if (settings[0].currentValue) {
             isNightMode.value
         } else {
             settings[1].currentValue
         }
-
         theme.postValue(themeValue)
-
         if (settings[0].currentValue) {
             settings[1].currentValue = true
             try {
@@ -158,12 +112,8 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
                 Log.e("MyViewModel", "Error Updating setting: ${e.message}")
             }
         }
-
-        Log.d("DBG", "Theme is $themeValue")
-
         currentSettings.postValue(settings)
     }
-
 
     fun makeTestData(testData: MutableLiveData<Double>) {
         viewModelScope.launch(Dispatchers.IO) {

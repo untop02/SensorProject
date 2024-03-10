@@ -36,7 +36,6 @@ import com.patrykandpatrick.vico.core.chart.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.core.component.shape.Shapes
 import com.patrykandpatrick.vico.core.component.shape.shader.DynamicShaders
 import com.patrykandpatrick.vico.core.component.shape.shader.TopBottomShader
-import com.patrykandpatrick.vico.core.marker.Marker
 import com.patrykandpatrick.vico.core.model.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.model.lineSeries
 import fi.metropolia.untop.sensorproject.data.MyViewModel
@@ -54,9 +53,7 @@ import java.text.DecimalFormat
 @Composable
 fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
     val valueList = remember { mutableStateListOf<Number>() }
-    val markerList = remember {
-        mutableMapOf<Float, Marker>()
-    }
+
     val index = remember { mutableIntStateOf(0) }
     val modelProducer = remember { CartesianChartModelProducer.build() }
 
