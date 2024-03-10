@@ -42,6 +42,12 @@ import com.patrykandpatrick.vico.core.model.lineSeries
 import fi.metropolia.untop.sensorproject.data.MyViewModel
 import fi.metropolia.untop.sensorproject.data.OfflineRepo
 import fi.metropolia.untop.sensorproject.data.SensorDatabase
+import fi.metropolia.untop.sensorproject.graphs.ComposeChart1
+import fi.metropolia.untop.sensorproject.graphs.ComposeChart3
+import fi.metropolia.untop.sensorproject.graphs.ComposeChart4
+import fi.metropolia.untop.sensorproject.graphs.ComposeChart7
+import fi.metropolia.untop.sensorproject.graphs.ComposeChart8
+import fi.metropolia.untop.sensorproject.graphs.ComposeChart9
 import java.math.RoundingMode
 import java.text.DecimalFormat
 
@@ -135,12 +141,12 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
         Column(
             modifier.verticalScroll(rememberScrollState())
         ) {
-            /*ComposeChart1(modelProducer = modelProducer)
+            ComposeChart1(modelProducer = modelProducer)
             ComposeChart3(modelProducer = modelProducer)
             ComposeChart4(modelProducer = modelProducer)
             ComposeChart7(modelProducer = modelProducer)
             ComposeChart8(modelProducer = modelProducer)
-            ComposeChart9(modelProducer = modelProducer)*/
+            ComposeChart9(modelProducer = modelProducer)
         }
 
     }

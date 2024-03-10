@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -65,6 +66,24 @@ fun Settings(viewModel: MyViewModel) {
 
 @Composable
 fun SettingItem(modifier: Modifier, setting: Setting, viewModel: MyViewModel) {
+    val settingValues = when (setting.name) {
+        "Automatic" -> Pair(
+            stringResource(id = R.string.setting_name_automatic),
+            stringResource(id = R.string.setting_desc_automatic)
+        )
+
+        "Theme" -> Pair(
+            stringResource(id = R.string.setting_name_theme),
+            stringResource(id = R.string.setting_desc_theme)
+        )
+
+        else -> {
+            Pair(
+                stringResource(id = R.string.setting_name_language),
+                stringResource(id = R.string.setting_desc_language)
+            )
+        }
+    }
     var checked by rememberSaveable { mutableStateOf(setting.currentValue) }
     ElevatedCard(
         Modifier.fillMaxWidth(),
@@ -91,11 +110,11 @@ fun SettingItem(modifier: Modifier, setting: Setting, viewModel: MyViewModel) {
                     .padding(start = 5.dp)
             ) {
                 Text(
-                    text = setting.name,
+                    text = settingValues.first,
                     fontWeight = FontWeight.Black,
                 )
                 Text(
-                    text = setting.description
+                    text = settingValues.second
                 )
             }
             Spacer(modifier = Modifier.weight(1f))

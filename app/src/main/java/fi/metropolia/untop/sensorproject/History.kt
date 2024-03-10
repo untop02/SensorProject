@@ -36,6 +36,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
@@ -74,7 +75,7 @@ fun History(modifier: Modifier, viewModel: MyViewModel, navController: NavHostCo
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "History",
+                stringResource(id = R.string.history_name),
                 modifier.padding(16.dp),
                 fontFamily = FontFamily.Cursive,
                 fontSize = 70.sp,

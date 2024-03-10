@@ -18,6 +18,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,14 +50,14 @@ fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostContr
             ) {
                 CustomCard(
                     modifier = modifier,
-                    name = "Temperature",
+                    name = stringResource(id = R.string.home_name_temp),
                     value = viewModel.ambientTemp.observeAsState(0.0),
                     navController = navController,
                     unit = " °C"
                 )
                 CustomCard(
                     modifier = modifier,
-                    name = "Humidity",
+                    name = stringResource(id = R.string.home_name_hum),
                     value = viewModel.humidity.observeAsState(0.0),
                     navController = navController,
                     unit = " %"
@@ -70,14 +71,14 @@ fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostContr
             ) {
                 CustomCard(
                     modifier = modifier,
-                    name = "Ambient air pressure",
+                    name = stringResource(id = R.string.home_name_pres),
                     value = viewModel.pressure.observeAsState(0.0),
                     navController = navController,
                     unit = " hPa"
                 )
                 CustomCard(
                     modifier = modifier,
-                    name = "Illuminance",
+                    name = stringResource(id = R.string.home_name_illum),
                     value = viewModel.light.observeAsState(0.0),
                     navController = navController,
                     unit = " lx"
