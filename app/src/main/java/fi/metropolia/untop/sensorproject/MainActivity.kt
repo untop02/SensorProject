@@ -34,14 +34,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import fi.metropolia.untop.sensorproject.data.Item
 import fi.metropolia.untop.sensorproject.data.MyViewModel
 import fi.metropolia.untop.sensorproject.data.OfflineRepo
 import fi.metropolia.untop.sensorproject.data.SensorDatabase
 import fi.metropolia.untop.sensorproject.data.Setting
 import fi.metropolia.untop.sensorproject.ui.theme.SensorProjectTheme
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class MainActivity : ComponentActivity(), SensorEventListener {
@@ -63,7 +60,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             LaunchedEffect(Unit) {
                 Log.d("DBG", "LaunchedEffect")
                 viewModel.getAllSettings()
-                Log.d("DBG","Theme is ${viewModel.theme.value}, Nightmode is ${viewModel.isNightMode.value}")
+                Log.d(
+                    "DBG",
+                    "Theme is ${viewModel.theme.value}, Nightmode is ${viewModel.isNightMode.value}"
+                )
             }
             viewModel.theme.observeAsState().value?.let { it ->
                 SensorProjectTheme(darkTheme = it) {
@@ -74,15 +74,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                         Scaffold(
                             floatingActionButton = {
                                 FloatingActionButton(onClick = {
-                                    val newItem = Item(
-                                        LocalDateTime.now()
-                                            .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")),
-                                        viewModel.ambientTemp.value ?: 0.0,
-                                        viewModel.humidity.value ?: 0.0,
-                                        viewModel.pressure.value ?: 0.0,
-                                        viewModel.light.value ?: 0.0
-                                    )
-                                    viewModel.insertItem(newItem)
+                                    viewModel.saveSenorsToDatabase()
                                 }) {
                                     Text(text = "Press")
                                 }

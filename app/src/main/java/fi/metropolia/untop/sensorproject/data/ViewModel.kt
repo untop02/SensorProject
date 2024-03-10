@@ -8,8 +8,8 @@ import fi.metropolia.untop.sensorproject.api.RetrofitInstance
 import fi.metropolia.untop.sensorproject.api.WeatherResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.Thread.sleep
-import java.util.concurrent.ThreadLocalRandom
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() {
     private val repository: WeatherRepository = WeatherRepository()
@@ -164,14 +164,18 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
         currentSettings.postValue(settings)
     }
 
-
-    fun makeTestData(testData: MutableLiveData<Double>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            while (true) {
-                val newNumber = ThreadLocalRandom.current().nextDouble(0.0, 101.0)
-                testData.postValue(newNumber)
-                sleep(1000)
-            }
-        }
+    fun saveSenorsToDatabase() {
+        val newItem = Item(
+            LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")),
+            ambientTemp.value ?: 0.0,
+            humidity.value ?: 0.0,
+            pressure.value ?: 0.0,
+            light.value ?: 0.0,
+            weatherData.value?.main?.temp ?: 0.0,
+            weatherData.value?.main?.humidity?.toDouble() ?: 0.0,
+            weatherData.value?.main?.pressure?.toDouble() ?: 0.0,
+        )
+        insertItem(newItem)
     }
 }

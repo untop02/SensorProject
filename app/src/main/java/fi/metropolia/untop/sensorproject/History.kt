@@ -146,7 +146,7 @@ fun ListItemPrev() {
     val navController = rememberNavController()
     ListItem(
         modifier = Modifier,
-        item = Item("12", 1.2, 1.2, 1.2, 1.2),
+        item = Item("12", 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2),
         navController = navController
     )
 }
