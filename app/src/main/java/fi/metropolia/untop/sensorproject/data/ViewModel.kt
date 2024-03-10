@@ -23,7 +23,6 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
     var theme = MutableLiveData(false)
     private var automatic = MutableLiveData(true)
     var isNightMode = MutableLiveData(false)
-
     class WeatherRepository {
         suspend fun getWeather(lat: Double, long: Double): WeatherResponse {
             return RetrofitInstance.service.getWeather(lat = lat, lon = long)
