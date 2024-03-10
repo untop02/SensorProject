@@ -4,13 +4,11 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import fi.metropolia.untop.sensorproject.SettingModel
 import fi.metropolia.untop.sensorproject.api.RetrofitInstance
 import fi.metropolia.untop.sensorproject.api.WeatherResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.Thread.sleep
-import java.util.Locale
 import java.util.concurrent.ThreadLocalRandom
 
 class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() {
@@ -21,20 +19,10 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
     val pressure = MutableLiveData(0.0)
     val weatherData = MutableLiveData<WeatherResponse>()
     var history = MutableLiveData<List<Item>>(emptyList())
+    var currentSettings = MutableLiveData<List<Setting>>(emptyList())
     var theme = MutableLiveData(false)
-    //Settings
-    val settings = listOf(
-        SettingModel(
-            "Theme",
-            "Change application theme",
-            if (theme.value == true) 1 else 0
-        ),
-        SettingModel(
-            "Language",
-            "Change Language",
-            if (Locale.getDefault().language == "en") 1 else 0
-        )
-    )
+    private var automatic = MutableLiveData(true)
+    var isNightMode = MutableLiveData(false)
 
     class WeatherRepository {
         suspend fun getWeather(lat: Double, long: Double): WeatherResponse {
@@ -56,7 +44,6 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
     fun insertItem(item: Item) {
         viewModelScope.launch {
             try {
-                // Insert item in a transaction
                 sensorRepository.insertItem(item)
             } catch (e: Exception) {
                 Log.e("MyViewModel", "Error inserting item: ${e.message}")
@@ -64,7 +51,6 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
             getAllItems()
         }
     }
-
 
     fun updateItem(item: Item) {
         viewModelScope.launch {
@@ -78,17 +64,6 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
         }
     }
 
-    fun insertSetting(setting: Setting) {
-        viewModelScope.launch {
-            try {
-                // Insert item in a transaction
-                sensorRepository.insertSetting(setting)
-            } catch (e: Exception) {
-                Log.e("MyViewModel", "Error inserting item: ${e.message}")
-            }
-            getAllItems()
-        }
-    }
     fun getAllItems() {
         viewModelScope.launch {
             try {
@@ -100,32 +75,82 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
         }
     }
 
-    fun updateSetting(setting: Setting) {
-        viewModelScope.launch {
-            sensorRepository.updateSetting(setting)
-        }
-    }
-
-    fun getSetting(name: String) {
+    fun insertSetting(setting: Setting) {
         viewModelScope.launch {
             try {
-                val setting = sensorRepository.getSetting(name)
-                theme.postValue(if (setting.value == 0) false else true)
-            }catch (e: Exception) {
-                Log.e("MyViewModel","Error getting setting: ${e.message}")
+                Log.d("DBG", "Inserting ${setting.name}")
+                sensorRepository.insertSetting(setting)
+            } catch (e: Exception) {
+                Log.e("MyViewModel", "Error inserting setting: ${e.message}")
             }
         }
     }
+
+    fun insertAllSettings(settings: List<Setting>) {
+        viewModelScope.launch {
+            try {
+                sensorRepository.insertAllSettings(settings)
+            } catch (e: Exception) {
+                Log.e("MyViewModel", "Error inserting settings: ${e.message}")
+
+            }
+        }
+    }
+
+    fun updateSetting(setting: Setting) {
+        viewModelScope.launch {
+            try {
+                sensorRepository.updateSetting(setting)
+
+            } catch (e: Exception) {
+                Log.e("MyViewModel", "Error updating setting ${e.message}")
+            }
+        }
+    }
+
+    fun updateSettingValue(name: String, newValue: Boolean) {
+        viewModelScope.launch {
+            try {
+                sensorRepository.updateValue(name, newValue)
+            } catch (e: Exception) {
+                Log.e("MyViewModel", "Error updating setting ${e.message}")
+            }
+        }
+    }
+
+    fun getSetting(settingName: String) {
+        viewModelScope.launch {
+            try {
+                val setting = sensorRepository.getSetting(settingName)
+            } catch (e: Exception) {
+                Log.e("MyViewModel", "Error getting setting: ${e.message}")
+            }
+        }
+    }
+
     fun getAllSettings() {
         viewModelScope.launch {
             try {
-                val data = sensorRepository.getAllSettings()
+                val settings = sensorRepository.getAllSettings()
+                updateSettings(settings)
             } catch (e: Exception) {
                 Log.e("MyViewModel", "Error getting settings: ${e.message}")
             }
         }
     }
 
+    private fun updateSettings(settings: List<Setting>) {
+        automatic.postValue(settings[0].currentValue)
+        Log.d("DBG", isNightMode.value.toString())
+        if (settings[0].currentValue) {
+            theme.postValue(isNightMode.value)
+            settings[1].currentValue = true
+        } else {
+            theme.postValue(settings[1].currentValue)
+        }
+        Log.d("DBG", theme.value.toString())
+        currentSettings.postValue(settings)
+    }
 
     fun makeTestData(testData: MutableLiveData<Double>) {
         viewModelScope.launch(Dispatchers.IO) {

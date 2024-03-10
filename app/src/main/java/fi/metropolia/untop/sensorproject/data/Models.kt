@@ -2,12 +2,10 @@ package fi.metropolia.untop.sensorproject.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
-import java.time.LocalTime
 
 @Entity(tableName = "items")
 data class Item(
-    @PrimaryKey()
+    @PrimaryKey
     val date: String,
     val temperature: Double,
     val humidity: Double,
@@ -20,16 +18,5 @@ data class Setting(
     @PrimaryKey
     val name: String,
     val description: String,
-    var value: Int
+    var currentValue: Boolean,
 )
-class LocalTimeConverter {
-    @TypeConverter
-    fun fromLocalTime(value: LocalTime): String {
-        return value.toString()
-    }
-
-    @TypeConverter
-    fun toLocalTime(value: String): LocalTime {
-        return LocalTime.parse(value)
-    }
-}

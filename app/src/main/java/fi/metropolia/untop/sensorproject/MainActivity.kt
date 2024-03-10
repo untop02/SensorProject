@@ -22,7 +22,9 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -40,58 +42,143 @@ import fi.metropolia.untop.sensorproject.data.Setting
 import fi.metropolia.untop.sensorproject.ui.theme.SensorProjectTheme
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
+import java.util.Locale
 
 class MainActivity : ComponentActivity(), SensorEventListener {
-    private lateinit var mSensorManager: SensorManager
-    private lateinit var database: SensorDatabase
-    private lateinit var viewModel: MyViewModel
+    private var mSensorManager: SensorManager? = null
     private var mTemp: Sensor? = null
     private var mLight: Sensor? = null
     private var mPressure: Sensor? = null
     private var mHumidity: Sensor? = null
+    private lateinit var database: SensorDatabase
+    private lateinit var viewModel: MyViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initializeViewModelAndDatabase()
+        getPermissions()
+        initializeSensors()
+        setContent {
+            val navController = rememberNavController()
+            var navigationSelectedItem by rememberSaveable { mutableIntStateOf(0) }
+            LaunchedEffect(Unit) {
+                Log.d("DBG", "LaunchedEffect")
+                viewModel.getAllSettings()
+                Log.d("DBG","Theme is ${viewModel.theme.value}, Nightmode is ${viewModel.isNightMode.value}")
+            }
+            viewModel.theme.observeAsState().value?.let { it ->
+                SensorProjectTheme(darkTheme = it) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        Scaffold(
+                            floatingActionButton = {
+                                FloatingActionButton(onClick = {
+                                    val newItem = Item(
+                                        LocalDateTime.now()
+                                            .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")),
+                                        viewModel.ambientTemp.value ?: 0.0,
+                                        viewModel.humidity.value ?: 0.0,
+                                        viewModel.pressure.value ?: 0.0,
+                                        viewModel.light.value ?: 0.0
+                                    )
+                                    viewModel.insertItem(newItem)
+                                }) {
+                                    Text(text = "Press")
+                                }
+                            },
+                            bottomBar = {
+                                BottomAppBar(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.primary,
+                                ) {
+                                    BottomNavigationItem().bottomNavigationItems()
+                                        .forEachIndexed { index, navigationItem ->
+                                            NavigationBarItem(
+                                                selected = index == navigationSelectedItem,
+                                                label = {
+                                                    Text(navigationItem.label)
+                                                },
+                                                icon = {
+                                                    Icon(
+                                                        navigationItem.icon,
+                                                        contentDescription = navigationItem.label
+                                                    )
+                                                },
+                                                onClick = {
+                                                    navigationSelectedItem = index
+                                                    navController.navigate(navigationItem.route) {
+                                                        popUpTo(navController.graph.findStartDestination().id) {
+                                                            saveState = true
+                                                        }
+                                                        launchSingleTop = true
+                                                        restoreState = true
+                                                    }
+                                                }
+                                            )
+                                        }
+                                }
+                            },
+                        ) { innerPadding ->
+                            NavHost(
+                                navController = navController,
+                                startDestination = Destinations.Home.route,
+                                modifier = Modifier.padding(paddingValues = innerPadding),
+                            ) {
+                                composable(Destinations.Home.route) {
+                                    Home(modifier = Modifier, viewModel, navController)
+                                }
+                                composable(Destinations.History.route) {
+                                    History(modifier = Modifier, viewModel, navController)
+                                }
+                                composable(Destinations.Settings.route) {
+                                    Settings(viewModel)
+                                }
+                                composable(
+                                    Destinations.Graph.route.plus("?observedName={observedName}"),
+                                    arguments = listOf(
+                                        navArgument("observedName") { defaultValue = "null" })
+                                ) {
+                                    Graph(
+                                        modifier = Modifier,
+                                        viewModel,
+                                        it.arguments?.getString("observedName")
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun initializeViewModelAndDatabase() {
         database = SensorDatabase.getDatabase(this)
         viewModel = MyViewModel(OfflineRepo(database.itemDao(), database.settingsDao()))
-        mSensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        mTemp = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
-        mLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
-        mPressure = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE)
-        mHumidity = mSensorManager.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY)
-        Log.d(
-            "DBG",
-            "All available Ambient Temp sensors ${mSensorManager.getSensorList(Sensor.TYPE_AMBIENT_TEMPERATURE)}"
-        )
-        Log.d(
-            "DBG",
-            "All available Light sensors ${mSensorManager.getSensorList(Sensor.TYPE_LIGHT)}"
-        )
-        Log.d(
-            "DBG",
-            "All available Pressure sensors: ${mSensorManager.getSensorList(Sensor.TYPE_PRESSURE)}"
-        )
-        Log.d(
-            "DBG",
-            "All available Humidity sensors: ${mSensorManager.getSensorList(Sensor.TYPE_RELATIVE_HUMIDITY)}"
-        )
-        Log.d("DBG", LocalDateTime.now().toString())
-        /*
-                viewModel.makeTestData(viewModel.ambientTemp)
-                viewModel.makeTestData(viewModel.humidity)
-                viewModel.makeTestData(viewModel.light)
-                viewModel.makeTestData(viewModel.pressure)
-        */
-        for (setting in viewModel.settings) {
-            viewModel.insertSetting(
-                Setting(
-                    setting.name,
-                    setting.description,
-                    setting.currentValue
-                )
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        viewModel.isNightMode.postValue(currentNightMode == Configuration.UI_MODE_NIGHT_YES)
+        val settings = listOf(
+            Setting(
+                name = "Automatic",
+                description = "Automatically change theme",
+                currentValue = true
+            ),
+            Setting(
+                name = "Theme",
+                description = "Change application theme",
+                currentValue = currentNightMode == Configuration.UI_MODE_NIGHT_YES
+            ),
+            Setting(
+                name = "Language",
+                description = "Change Language",
+                currentValue = Locale.getDefault().language == "en"
             )
-        }
+        )
+        viewModel.insertAllSettings(settings)
+    }
 
+    private fun getPermissions() {
         val requiredPermissions: Array<String> = arrayOf(
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN,
@@ -114,110 +201,27 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                 }
             }
         requestPermissionsLauncher.launch(requiredPermissions)
-        setContent {
-            isDarkModeOn()
-            val navController = rememberNavController()
-            var navigationSelectedItem by rememberSaveable { mutableIntStateOf(0) }
-            SensorProjectTheme(darkTheme = isDarkModeOn()) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
-                ) {
-                    Scaffold(
-                        floatingActionButton = {
-                            FloatingActionButton(onClick = {
-                                val newItem = Item(
-                                    LocalDateTime.now()
-                                        .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")),
-                                    viewModel.ambientTemp.value ?: 0.0,
-                                    viewModel.humidity.value ?: 0.0,
-                                    viewModel.pressure.value ?: 0.0,
-                                    viewModel.light.value ?: 0.0
-                                )
-                                viewModel.insertItem(newItem)
-                            }) {
-                                Text(text = "Press")
-                            }
-                        },
-                        bottomBar = {
-                            BottomAppBar(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.primary,
-                            ) {
-                                BottomNavigationItem().bottomNavigationItems()
-                                    .forEachIndexed { index, navigationItem ->
-                                        NavigationBarItem(
-                                            selected = index == navigationSelectedItem,
-                                            label = {
-                                                Text(navigationItem.label)
-                                            },
-                                            icon = {
-                                                Icon(
-                                                    navigationItem.icon,
-                                                    contentDescription = navigationItem.label
-                                                )
-                                            },
-                                            onClick = {
-                                                navigationSelectedItem = index
-                                                navController.navigate(navigationItem.route) {
-                                                    popUpTo(navController.graph.findStartDestination().id) {
-                                                        saveState = true
-                                                    }
-                                                    launchSingleTop = true
-                                                    restoreState = true
-                                                }
-                                            }
-                                        )
-                                    }
-                            }
-                        },
-                    ) { innerPadding ->
-                        NavHost(
-                            navController = navController,
-                            startDestination = Destinations.Home.route,
-                            modifier = Modifier.padding(paddingValues = innerPadding),
-                        ) {
-                            composable(Destinations.Home.route) {
-                                Home(modifier = Modifier, viewModel, navController)
-                            }
-                            composable(Destinations.History.route) {
-                                History(modifier = Modifier, viewModel, navController)
-                            }
-                            composable(Destinations.Settings.route) {
-                                Settings(modifier = Modifier, viewModel)
-                            }
-                            composable(
-                                Destinations.Graph.route.plus("?observedName={observedName}"),
-                                arguments = listOf(
-                                    navArgument("observedName") { defaultValue = "null" })
-                            ) {
-                                Graph(
-                                    modifier = Modifier,
-                                    viewModel,
-                                    it.arguments?.getString("observedName")
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
-    private fun isDarkModeOn(): Boolean {
-        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        //viewModel.updateSetting(Setting("Theme","Change application theme", if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) 1 else 0))
-        return currentNightMode == Configuration.UI_MODE_NIGHT_YES
+
+    private fun initializeSensors() {
+        mSensorManager = getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+        mTemp = mSensorManager?.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
+        mLight = mSensorManager?.getDefaultSensor(Sensor.TYPE_LIGHT)
+        mPressure = mSensorManager?.getDefaultSensor(Sensor.TYPE_PRESSURE)
+        mHumidity = mSensorManager?.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY)
     }
+
     override fun onResume() {
         super.onResume()
-        mSensorManager.registerListener(this, mTemp, SensorManager.SENSOR_DELAY_NORMAL)
-        mSensorManager.registerListener(this, mLight, SensorManager.SENSOR_DELAY_NORMAL)
-        mSensorManager.registerListener(this, mPressure, SensorManager.SENSOR_DELAY_NORMAL)
-        mSensorManager.registerListener(this, mHumidity, SensorManager.SENSOR_DELAY_NORMAL)
+        mSensorManager?.registerListener(this, mTemp, SensorManager.SENSOR_DELAY_NORMAL)
+        mSensorManager?.registerListener(this, mLight, SensorManager.SENSOR_DELAY_NORMAL)
+        mSensorManager?.registerListener(this, mPressure, SensorManager.SENSOR_DELAY_NORMAL)
+        mSensorManager?.registerListener(this, mHumidity, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
     override fun onPause() {
         super.onPause()
-        mSensorManager.unregisterListener(this)
+        mSensorManager?.unregisterListener(this)
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}

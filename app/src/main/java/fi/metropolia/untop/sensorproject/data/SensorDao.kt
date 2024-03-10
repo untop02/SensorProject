@@ -29,8 +29,14 @@ interface SensorDao {
 interface SettingsDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(setting: Setting)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAllSettings(settings: List<Setting>)
+
     @Update
     suspend fun update(setting: Setting)
+    @Query("UPDATE settings SET currentValue = :newValue WHERE name = :name")
+    suspend fun updateValue(name: String, newValue: Boolean)
     @Query("SELECT * FROM settings WHERE name = :name")
     suspend fun getSetting(name: String): Setting
 
