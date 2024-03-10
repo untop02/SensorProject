@@ -141,16 +141,29 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
 
     private fun updateSettings(settings: List<Setting>) {
         automatic.postValue(settings[0].currentValue)
-        Log.d("DBG", isNightMode.value.toString())
-        if (settings[0].currentValue) {
-            theme.postValue(isNightMode.value)
-            settings[1].currentValue = true
+
+        val themeValue = if (settings[0].currentValue) {
+            isNightMode.value
         } else {
-            theme.postValue(settings[1].currentValue)
+            settings[1].currentValue
         }
-        Log.d("DBG", theme.value.toString())
+
+        theme.postValue(themeValue)
+
+        if (settings[0].currentValue) {
+            settings[1].currentValue = true
+            try {
+                updateSettingValue("Theme", true)
+            } catch (e: Exception) {
+                Log.e("MyViewModel", "Error Updating setting: ${e.message}")
+            }
+        }
+
+        Log.d("DBG", "Theme is $themeValue")
+
         currentSettings.postValue(settings)
     }
+
 
     fun makeTestData(testData: MutableLiveData<Double>) {
         viewModelScope.launch(Dispatchers.IO) {
