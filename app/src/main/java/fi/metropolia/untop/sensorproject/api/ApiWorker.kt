@@ -5,57 +5,41 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.MutableLiveData
 import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.WorkerParameters
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import okhttp3.internal.wait
+import kotlinx.coroutines.tasks.await
 
 class ApiWorker(appContext: Context, params: WorkerParameters) :
     CoroutineWorker(appContext, params) {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    private val data = MutableLiveData("")
     override suspend fun doWork(): Result {
         return try {
-            getData().wait()
-            Log.d("DBG", "DOES THIS SHIT HAPPEN EARLY")
-            val results = Data.Builder().putString("modified_data", data.value).build()
+
+            val results = Data.Builder()
+                .putString("modified_data", weatherData(getLocation(applicationContext))).build()
             Result.success(results)
         } catch (e: Exception) {
-            Log.d("DBG", "DOES THIS SHIT HAPPEN EARLY")
+            Log.d("DBG", "CRASHED WORKER")
             Result.failure()
         }
     }
 
-    private suspend fun getData() {
-        val myCoroutineScope = CoroutineScope(Job() + Dispatchers.Main)
-        getLocation(context = this.applicationContext, onGetLastLocationSuccess = { location ->
-            val (lat, long) = location
-            myCoroutineScope.launch {
-                val serverResp = RetrofitInstance.service.getWeather(lat, long)
-                Log.d("DBG", "Weather data between $serverResp")
-                val gson = Gson()
-                val modifiedJson = gson.toJson(serverResp)
-                data.postValue(modifiedJson)
-                Log.d("DBG", "Weather data after $modifiedJson")
-            }
-        }, onGetLastLocationFailed = { exception ->
-            Log.e("Location", "Failed to retrieve location: ${exception.message}")
-        })
+    private suspend fun weatherData(location: Pair<Double, Double>?): String? {
+        if (location != null) {
+            val serverResp = RetrofitInstance.service.getWeather(location.first, location.second)
+            val gson = Gson()
+            return gson.toJson(serverResp)
+        }
+        return null
     }
 
-    private fun getLocation(
-        context: Context,
-        onGetLastLocationSuccess: (Pair<Double, Double>) -> Unit,
-        onGetLastLocationFailed: (Exception) -> Unit
-    ) {
+    private suspend fun getLocation(
+        context: Context
+    ): Pair<Double, Double>? {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
         if (ActivityCompat.checkSelfPermission(
                 context, Manifest.permission.ACCESS_FINE_LOCATION
@@ -63,15 +47,21 @@ class ApiWorker(appContext: Context, params: WorkerParameters) :
                 context, Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            Log.d("DBG", "Why no location")
-            return
+            Log.d("DBG", "Why no location, sending null")
+            return null
         }
-        fusedLocationProviderClient.lastLocation.addOnSuccessListener { location ->
-            location?.let {
-                onGetLastLocationSuccess(Pair(it.latitude, it.longitude))
+        return try {
+            val location = fusedLocationProviderClient.lastLocation.await()
+            if (location != null) {
+                Log.d("DBG", "Success location $location")
+                Pair(location.latitude, location.longitude)
+            } else {
+                Log.d("DBG", "Last location is null")
+                null
             }
-        }.addOnFailureListener { exception ->
-            onGetLastLocationFailed(exception)
+        } catch (e: Exception) {
+            Log.e("DBG", "Error getting last location: ${e.message}")
+            null
         }
     }
 
