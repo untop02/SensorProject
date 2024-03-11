@@ -45,7 +45,8 @@ fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostContr
                 .padding(horizontal = 16.dp)
                 .padding(top = 16.dp),
         ) {
-            Text(text = "Phone",
+            Text(
+                text = "Phone",
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(16.dp),
@@ -81,7 +82,7 @@ fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostContr
             ) {
                 CustomCard(
                     modifier = modifier,
-                    name = "Ambient air pressure",
+                    name = "Air pressure",
                     value = viewModel.pressure.observeAsState(0.0),
                     navController = navController,
                     unit = " hPa"
@@ -139,8 +140,12 @@ fun HomePrev() {
     val context = LocalContext.current
     val sensorDatabase = SensorDatabase.getDatabase(context)
     val navController = rememberNavController()
-    Home(modifier = Modifier, viewModel = MyViewModel(OfflineRepo(
-        sensorDatabase.itemDao(),
-        sensorDatabase.settingsDao()
-    )), navController = navController)
+    Home(
+        modifier = Modifier, viewModel = MyViewModel(
+            OfflineRepo(
+                sensorDatabase.itemDao(),
+                sensorDatabase.settingsDao()
+            )
+        ), navController = navController
+    )
 }

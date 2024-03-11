@@ -64,14 +64,11 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         getPermissions()
         initializeSensors()
 
-        val periodicWorkRequest = PeriodicWorkRequestBuilder<ApiWorker>(1, TimeUnit.HOURS)
-            .build()
+        val periodicWorkRequest = PeriodicWorkRequestBuilder<ApiWorker>(1, TimeUnit.HOURS).build()
         val initialWorkRequest = OneTimeWorkRequestBuilder<ApiWorker>().build()
         WorkManager.getInstance(this).enqueue(initialWorkRequest)
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "hourly_work",
-            ExistingPeriodicWorkPolicy.KEEP,
-            periodicWorkRequest
+            "hourly_work", ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest
         )
 
         // Add a listener to get the result data when the weather API work completes
@@ -127,8 +124,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                                 ) {
                                     BottomNavigationItem().bottomNavigationItems()
                                         .forEachIndexed { index, navigationItem ->
-                                            NavigationBarItem(
-                                                selected = index == navigationSelectedItem,
+                                            NavigationBarItem(selected = index == navigationSelectedItem,
                                                 label = {
                                                     Text(navigationItem.label)
                                                 },
@@ -147,8 +143,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                                                         launchSingleTop = true
                                                         restoreState = true
                                                     }
-                                                }
-                                            )
+                                                })
                                         }
                                 }
                             },
@@ -169,8 +164,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                                 }
                                 composable(
                                     Destinations.Graph.route.plus("?observedName={observedName}"),
-                                    arguments = listOf(
-                                        navArgument("observedName") { defaultValue = "null" })
+                                    arguments = listOf(navArgument("observedName") {
+                                        defaultValue = "null"
+                                    })
                                 ) {
                                     Graph(
                                         modifier = Modifier,
@@ -193,16 +189,12 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         viewModel.isNightMode.postValue(currentNightMode == Configuration.UI_MODE_NIGHT_YES)
         val settings = listOf(
             Setting(
-                name = "Automatic",
-                description = "Automatically change theme",
-                currentValue = true
-            ),
-            Setting(
+                name = "Automatic", description = "Automatically change theme", currentValue = true
+            ), Setting(
                 name = "Theme",
                 description = "Change application theme",
                 currentValue = currentNightMode == Configuration.UI_MODE_NIGHT_YES
-            ),
-            Setting(
+            ), Setting(
                 name = "Language",
                 description = "Change Language",
                 currentValue = Locale.getDefault().language == "en"
@@ -211,18 +203,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         viewModel.insertAllSettings(settings)
     }
 
-    private fun getWeather(context : Context){
-        getLocation(
-            context = context,
-            onGetLastLocationSuccess = { location ->
-                val (lat, long) = location
-                Log.d("DBG", "THIS SHOULD BE LAT AND LONG $lat $long")
-                viewModel.getWeather(lat,long)
-            },
-            onGetLastLocationFailed = { exception ->
-                Log.e("Location", "Failed to retrieve location: ${exception.message}")
-            })
-    }
     private fun getPermissions() {
         val requiredPermissions: Array<String> = arrayOf(
             Manifest.permission.BLUETOOTH,
