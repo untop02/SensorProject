@@ -20,6 +20,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
     var theme = MutableLiveData(false)
     private var automatic = MutableLiveData(true)
     var isNightMode = MutableLiveData(false)
+    var nullSensors = MutableLiveData<List<String>>(emptyList())
 
     private fun insertItem(item: Item) {
         viewModelScope.launch {
@@ -57,7 +58,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
     fun updateSettingValue(name: String, newValue: Boolean) {
         viewModelScope.launch {
             try {
-                sensorRepository.updateValue(name, newValue)
+                sensorRepository.updateSettingValue(name, newValue)
             } catch (e: Exception) {
                 Log.e("MyViewModel", "Error updating setting ${e.message}")
             }

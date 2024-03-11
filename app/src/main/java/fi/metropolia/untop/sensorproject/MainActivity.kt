@@ -234,6 +234,18 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         mLight = mSensorManager?.getDefaultSensor(Sensor.TYPE_LIGHT)
         mPressure = mSensorManager?.getDefaultSensor(Sensor.TYPE_PRESSURE)
         mHumidity = mSensorManager?.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY)
+
+        val sensors = mapOf(
+            Sensor.TYPE_AMBIENT_TEMPERATURE to "Temperature",
+            Sensor.TYPE_LIGHT to "Light",
+            Sensor.TYPE_PRESSURE to "Pressure",
+            Sensor.TYPE_RELATIVE_HUMIDITY to "Humidity"
+        )
+
+        val nullSensors = sensors.filter { (sensorType, _) ->
+            mSensorManager?.getDefaultSensor(sensorType) == null
+        }.map { (_, sensorName) -> sensorName }
+        viewModel.nullSensors.postValue(nullSensors)
     }
 
     override fun onResume() {

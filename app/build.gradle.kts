@@ -78,6 +78,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.2.0")
     implementation("com.google.accompanist:accompanist-permissions:0.35.0-alpha")
     implementation("io.coil-kt:coil:2.6.0")
+    implementation ("androidx.core:core-splashscreen:1.0.1")
 
     //VICO
     implementation("com.patrykandpatrick.vico:compose:2.0.0-alpha.8")
