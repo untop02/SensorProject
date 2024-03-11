@@ -38,10 +38,9 @@ import fi.metropolia.untop.sensorproject.data.MyViewModel
 import java.math.RoundingMode
 import java.text.DecimalFormat
 
-private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
 @Composable
-fun Weather(modifier: Modifier, context: Context, viewModel: MyViewModel) {
+fun Weather(modifier: Modifier, viewModel: MyViewModel) {
 
     Spacer(modifier = Modifier.height(20.dp))
     Box(
@@ -152,38 +151,4 @@ fun ApiCard(
                 .align(Alignment.CenterHorizontally), textAlign = TextAlign.Center
         )
     }
-}
-fun getLocation(
-    context: Context,
-    onGetLastLocationSuccess: (Pair<Double, Double>) -> Unit,
-    onGetLastLocationFailed: (Exception) -> Unit
-) {
-    fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
-    if (ActivityCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) != PackageManager.PERMISSION_GRANTED
-    ) {
-        Log.d("DBG", "Why no location")
-        // TODO: Consider calling
-        //    ActivityCompat#requestPermissions
-        // here to request the missing permissions, and then overriding
-        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-        //                                          int[] grantResults)
-        // to handle the case where the user grants the permission. See the documentation
-        // for ActivityCompat#requestPermissions for more details.
-        return
-    }
-    fusedLocationProviderClient.lastLocation
-        .addOnSuccessListener { location ->
-            location?.let {
-                onGetLastLocationSuccess(Pair(it.latitude, it.longitude))
-            }
-        }
-        .addOnFailureListener { exception ->
-            onGetLastLocationFailed(exception)
-        }
 }

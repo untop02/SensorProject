@@ -10,7 +10,10 @@ data class Item(
     val temperature: Double,
     val humidity: Double,
     val pressure: Double,
-    val illuminance: Double
+    val illuminance: Double,
+    val temperatureAPI: Double,
+    val humidityAPI: Double,
+    val pressureAPI: Double
 )
 
 @Entity(tableName = "settings")

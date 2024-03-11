@@ -145,7 +145,7 @@ fun ListItemPrev() {
     val navController = rememberNavController()
     ListItem(
         modifier = Modifier,
-        item = Item("12", 1.2, 1.2, 1.2, 1.2),
+        item = Item("12", 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2),
         navController = navController
     )
 }
@@ -158,7 +158,12 @@ fun ListPrev() {
     val sensorDatabase = SensorDatabase.getDatabase(context)
     History(
         modifier = Modifier,
-        viewModel = MyViewModel(OfflineRepo(sensorDatabase.itemDao(), sensorDatabase.settingsDao())),
+        viewModel = MyViewModel(
+            OfflineRepo(
+                sensorDatabase.itemDao(),
+                sensorDatabase.settingsDao()
+            )
+        ),
         navController = navController
     )
 }
