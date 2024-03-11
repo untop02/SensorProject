@@ -83,7 +83,7 @@ fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostContr
                     unit = " lx"
                 )
             }
-            Weather(modifier = Modifier, context = LocalContext.current, viewModel = viewModel)
+            Weather(modifier = Modifier, viewModel = viewModel)
         }
     }
 }

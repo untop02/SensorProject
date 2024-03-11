@@ -97,7 +97,7 @@ fun History(modifier: Modifier, viewModel: MyViewModel, navController: NavHostCo
                     ListItem(modifier, item, navController)
                 }
             }
-            Weather(modifier = modifier, context = LocalContext.current, viewModel = viewModel)
+            Weather(modifier = modifier, viewModel = viewModel)
         }
     }
 }
@@ -159,7 +159,12 @@ fun ListPrev() {
     val sensorDatabase = SensorDatabase.getDatabase(context)
     History(
         modifier = Modifier,
-        viewModel = MyViewModel(OfflineRepo(sensorDatabase.itemDao(), sensorDatabase.settingsDao())),
+        viewModel = MyViewModel(
+            OfflineRepo(
+                sensorDatabase.itemDao(),
+                sensorDatabase.settingsDao()
+            )
+        ),
         navController = navController
     )
 }
