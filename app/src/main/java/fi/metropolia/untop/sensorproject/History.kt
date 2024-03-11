@@ -97,7 +97,6 @@ fun History(modifier: Modifier, viewModel: MyViewModel, navController: NavHostCo
                     ListItem(modifier, item, navController)
                 }
             }
-            Weather(modifier = modifier, context = LocalContext.current, viewModel = viewModel)
         }
     }
 }

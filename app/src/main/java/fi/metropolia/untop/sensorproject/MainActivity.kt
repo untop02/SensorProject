@@ -178,6 +178,18 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         viewModel.insertAllSettings(settings)
     }
 
+    private fun getWeather(context : Context){
+        getLocation(
+            context = context,
+            onGetLastLocationSuccess = { location ->
+                val (lat, long) = location
+                Log.d("DBG", "THIS SHOULD BE LAT AND LONG $lat $long")
+                viewModel.getWeather(lat,long)
+            },
+            onGetLastLocationFailed = { exception ->
+                Log.e("Location", "Failed to retrieve location: ${exception.message}")
+            })
+    }
     private fun getPermissions() {
         val requiredPermissions: Array<String> = arrayOf(
             Manifest.permission.BLUETOOTH,

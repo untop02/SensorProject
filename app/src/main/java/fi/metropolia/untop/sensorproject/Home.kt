@@ -17,11 +17,13 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import fi.metropolia.untop.sensorproject.data.MyViewModel
@@ -43,6 +45,15 @@ fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostContr
                 .padding(horizontal = 16.dp)
                 .padding(top = 16.dp),
         ) {
+            Text(text = "Phone",
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                fontSize = 32.sp, // Larger font size for title
+                color = Color.DarkGray, // Customize color as needed
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold
+            )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Absolute.SpaceEvenly
