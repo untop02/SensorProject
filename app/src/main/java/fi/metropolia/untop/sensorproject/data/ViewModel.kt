@@ -8,8 +8,6 @@ import fi.metropolia.untop.sensorproject.api.RetrofitInstance
 import fi.metropolia.untop.sensorproject.api.WeatherResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.Thread.sleep
-import java.util.concurrent.ThreadLocalRandom
 
 class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() {
     private val repository: WeatherRepository = WeatherRepository()
@@ -20,7 +18,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
     val weatherData = MutableLiveData<WeatherResponse>()
     var history = MutableLiveData<List<Item>>(emptyList())
     var currentSettings = MutableLiveData<List<Setting>>(emptyList())
-    var theme = MutableLiveData(false)
+    var theme = MutableLiveData<Boolean?>()
     private var automatic = MutableLiveData(true)
     var isNightMode = MutableLiveData(false)
     var nullSensors = MutableLiveData<List<String>>(emptyList())
@@ -113,15 +111,5 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
             }
         }
         currentSettings.postValue(settings)
-    }
-
-    fun makeTestData(testData: MutableLiveData<Double>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            while (true) {
-                val newNumber = ThreadLocalRandom.current().nextDouble(0.0, 101.0)
-                testData.postValue(newNumber)
-                sleep(1000)
-            }
-        }
     }
 }

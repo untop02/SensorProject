@@ -25,6 +25,7 @@ import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
 import com.patrykandpatrick.vico.compose.chart.CartesianChartHost
 import com.patrykandpatrick.vico.compose.chart.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.chart.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.chart.scroll.rememberChartScrollState
 import com.patrykandpatrick.vico.compose.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.component.shape.shader.color
@@ -41,35 +42,41 @@ import com.patrykandpatrick.vico.core.model.lineSeries
 import fi.metropolia.untop.sensorproject.data.MyViewModel
 import fi.metropolia.untop.sensorproject.data.OfflineRepo
 import fi.metropolia.untop.sensorproject.data.SensorDatabase
-import fi.metropolia.untop.sensorproject.graphs.ComposeChart1
-import fi.metropolia.untop.sensorproject.graphs.ComposeChart3
-import fi.metropolia.untop.sensorproject.graphs.ComposeChart4
 import fi.metropolia.untop.sensorproject.graphs.ComposeChart7
-import fi.metropolia.untop.sensorproject.graphs.ComposeChart8
-import fi.metropolia.untop.sensorproject.graphs.ComposeChart9
 import java.math.RoundingMode
 import java.text.DecimalFormat
 
 @Composable
 fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
     val valueList = remember { mutableStateListOf<Number>() }
+    val valueList2 = remember { mutableStateListOf<Number>() }
+    /*val random = Random.Default
+    val data_1 = List(20) { random.nextDouble(0.0, 100.0) }
+    val data_2 = List(20) { random.nextDouble(0.0, 100.0) }*/
 
     val index = remember { mutableIntStateOf(0) }
     val modelProducer = remember { CartesianChartModelProducer.build() }
-
+    val data2 = viewModel.pressure.observeAsState(initial = 0).value
     val data = when (name) {
         "Temperature" -> viewModel.ambientTemp.observeAsState(initial = 0).value
         "Humidity" -> viewModel.humidity.observeAsState(initial = 0).value
         "Ambient air pressure" -> viewModel.pressure.observeAsState(initial = 0).value
-        //Pitää vielä säätää oikein, sitte ko tietää mitä näytetään🐨
         else -> viewModel.light.observeAsState(initial = 0).value
     }
-
     LaunchedEffect(data) {
         valueList.add(data.toFloat())
+        valueList2.add(data2.toFloat())
         index.intValue++
-        modelProducer.tryRunTransaction { lineSeries { series(valueList) } }
+        modelProducer.tryRunTransaction { lineSeries { series(valueList);series(valueList2) } }
     }
+    /*LaunchedEffect(Unit) {
+        modelProducer.tryRunTransaction {
+            lineSeries {
+                series(data2)
+                series(data1)
+            }
+        }
+    }*/
 
     Column(modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         val df = DecimalFormat("#.##")
@@ -134,21 +141,23 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
             ),
             modelProducer = modelProducer,
             marker = rememberMarker(),
+            chartScrollState = rememberChartScrollState()
+
         )
         Column(
             modifier.verticalScroll(rememberScrollState())
         ) {
-            ComposeChart1(modelProducer = modelProducer)
+            ComposeChart7(modelProducer = modelProducer)
+            /*ComposeChart1(modelProducer = modelProducer)
             ComposeChart3(modelProducer = modelProducer)
             ComposeChart4(modelProducer = modelProducer)
             ComposeChart7(modelProducer = modelProducer)
             ComposeChart8(modelProducer = modelProducer)
-            ComposeChart9(modelProducer = modelProducer)
+            ComposeChart9(modelProducer = modelProducer)*/
         }
 
     }
 }
-
 
 /*CartesianChartHost(
             rememberCartesianChart(
@@ -181,8 +190,12 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
 @Composable
 private fun GraphTest() {
     val sensorDatabase = SensorDatabase.getDatabase(LocalContext.current)
-    Graph(modifier = Modifier, viewModel = MyViewModel(OfflineRepo(
-        sensorDatabase.itemDao(),
-        sensorDatabase.settingsDao()
-    )), name = "Temperature")
+    Graph(
+        modifier = Modifier, viewModel = MyViewModel(
+            OfflineRepo(
+                sensorDatabase.itemDao(),
+                sensorDatabase.settingsDao()
+            )
+        ), name = "Temperature"
+    )
 }

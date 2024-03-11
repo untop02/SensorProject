@@ -88,7 +88,6 @@ fun History(modifier: Modifier, viewModel: MyViewModel, navController: NavHostCo
                     )
                 )
             )
-            Text(text = history?.size.toString())
             LazyColumn(
                 modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -98,7 +97,6 @@ fun History(modifier: Modifier, viewModel: MyViewModel, navController: NavHostCo
                     ListItem(modifier, item, navController)
                 }
             }
-            Weather(modifier = modifier, context = LocalContext.current, viewModel = viewModel)
         }
     }
 }
