@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,7 +33,7 @@ fun Weather(modifier: Modifier, viewModel: MyViewModel) {
     ) {
         Log.d("Weather", viewModel.weatherData.observeAsState().value.toString())
         Text(
-            text = "Outside",
+            text = stringResource(id = R.string.row_name_out),
             modifier = modifier
                 .fillMaxWidth()
                 .padding(16.dp),
@@ -44,25 +45,25 @@ fun Weather(modifier: Modifier, viewModel: MyViewModel) {
         val sensors = listOf(
             ApiSensorData(
                 R.string.home_name_temp,
-                "Temperature",
+                stringResource(id = R.string.home_name_temp),
                 viewModel.weatherData.value?.main?.temp.toString(),
                 " °C"
             ),
             ApiSensorData(
                 R.string.home_name_hum,
-                "Humidity",
+                stringResource(id = R.string.home_name_hum),
                 viewModel.weatherData.value?.main?.humidity.toString(),
                 " %"
             ),
             ApiSensorData(
                 R.string.home_name_pres,
-                "Pressure",
+                stringResource(id = R.string.home_name_pres),
                 viewModel.weatherData.value?.main?.pressure.toString(),
                 " hPa"
             ),
             ApiSensorData(
                 R.string.home_name_illum,
-                "Feels like",
+                stringResource(id = R.string.home_name_feels),
                 viewModel.weatherData.value?.main?.feels_like.toString(),
                 " lx"
             )
@@ -82,7 +83,7 @@ fun ApiSensorRow(sensors: List<ApiSensorData>) {
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         for (sensor in sensors) {
-            ApiCard(modifier = Modifier, name = "test", value = sensor.value, unit = sensor.unit)
+            ApiCard(modifier = Modifier, name = sensor.idName, value = sensor.value, unit = sensor.unit)
         }
     }
 }

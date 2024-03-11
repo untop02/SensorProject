@@ -55,18 +55,13 @@ fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostContr
                     .padding(top = 16.dp)
             ) {
                 val sensors = listOf(
-                    SensorData(
-                        R.string.home_name_temp,
-                        "Temperature",
-                        viewModel.ambientTemp,
-                        " °C"
-                    ),
+                    SensorData(R.string.home_name_temp,"Temperature", viewModel.ambientTemp," °C"),
                     SensorData(R.string.home_name_hum, "Humidity", viewModel.humidity, " %"),
                     SensorData(R.string.home_name_pres, "Pressure", viewModel.pressure, " hPa"),
                     SensorData(R.string.home_name_illum, "Illuminance", viewModel.light, " lx")
                 )
                 Text(
-                    text = "Phone",
+                    text = stringResource(id = R.string.row_name_phone),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),

@@ -63,35 +63,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         initializeViewModelAndDatabase()
         getPermissions()
         initializeSensors()
-
-        val periodicWorkRequest = PeriodicWorkRequestBuilder<ApiWorker>(1, TimeUnit.HOURS).build()
-        val initialWorkRequest = OneTimeWorkRequestBuilder<ApiWorker>().build()
-        WorkManager.getInstance(this).enqueue(initialWorkRequest)
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "hourly_work", ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest
-        )
-
-        // Add a listener to get the result data when the weather API work completes
-        WorkManager.getInstance(this).getWorkInfoByIdLiveData(periodicWorkRequest.id)
-            .observe(this) { workInfo ->
-                if (workInfo != null && workInfo.state == WorkInfo.State.SUCCEEDED) {
-                    val outputData = workInfo.outputData
-                    val resultData = outputData.getString("modified_data")
-                    val gson = Gson()
-                    val myData = gson.fromJson(resultData, WeatherResponse::class.java)
-                    viewModel.weatherData.postValue(myData)
-                }
-            }
-        WorkManager.getInstance(this).getWorkInfoByIdLiveData(initialWorkRequest.id)
-            .observe(this) { workInfo ->
-                if (workInfo != null && workInfo.state == WorkInfo.State.SUCCEEDED) {
-                    val outputData = workInfo.outputData
-                    val resultData = outputData.getString("modified_data")
-                    val gson = Gson()
-                    val myData = gson.fromJson(resultData, WeatherResponse::class.java)
-                    viewModel.weatherData.postValue(myData)
-                }
-            }
+        initalizeWorkers()
         setContent {
             val navController = rememberNavController()
             var navigationSelectedItem by rememberSaveable { mutableIntStateOf(0) }
@@ -180,6 +152,37 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                 }
             }
         }
+    }
+
+    private fun initalizeWorkers() {
+        val periodicWorkRequest = PeriodicWorkRequestBuilder<ApiWorker>(1, TimeUnit.HOURS).build()
+        val initialWorkRequest = OneTimeWorkRequestBuilder<ApiWorker>().build()
+        WorkManager.getInstance(this).enqueue(initialWorkRequest)
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "hourly_work", ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest
+        )
+
+        // Add a listener to get the result data when the weather API work completes
+        WorkManager.getInstance(this).getWorkInfoByIdLiveData(periodicWorkRequest.id)
+            .observe(this) { workInfo ->
+                if (workInfo != null && workInfo.state == WorkInfo.State.SUCCEEDED) {
+                    val outputData = workInfo.outputData
+                    val resultData = outputData.getString("modified_data")
+                    val gson = Gson()
+                    val myData = gson.fromJson(resultData, WeatherResponse::class.java)
+                    viewModel.weatherData.postValue(myData)
+                }
+            }
+        WorkManager.getInstance(this).getWorkInfoByIdLiveData(initialWorkRequest.id)
+            .observe(this) { workInfo ->
+                if (workInfo != null && workInfo.state == WorkInfo.State.SUCCEEDED) {
+                    val outputData = workInfo.outputData
+                    val resultData = outputData.getString("modified_data")
+                    val gson = Gson()
+                    val myData = gson.fromJson(resultData, WeatherResponse::class.java)
+                    viewModel.weatherData.postValue(myData)
+                }
+            }
     }
 
     private fun initializeViewModelAndDatabase() {

@@ -6,13 +6,16 @@
     <string name="setting_desc_automatic">Automaattisesti vaihda teema</string>
     <string name="setting_desc_theme">Vaihda sovelluksen teema</string>
     <string name="setting_desc_language">Vaihda sovelluksen kieli</string>
-    <string name="menu_name_home">Koti(?)</string>
+    <string name="menu_name_home">Koti</string>
     <string name="menu_name_history">Historia</string>
     <string name="menu_name_settings">Asetukset</string>
     <string name="home_name_temp">Lämpötila</string>
     <string name="home_name_hum">Kosteus</string>
     <string name="home_name_pres">Ilmanpaine</string>
-    <string name="home_name_illum">Valoisuus(?)</string>
+    <string name="home_name_illum">Valoisuus</string>
     <string name="history_name">Historia</string>
+    <string name="home_name_feels">Tuntuu</string>
+    <string name="row_name_phone">Puhelin</string>
+    <string name="row_name_out">Ulkona</string>
 
 </resources>

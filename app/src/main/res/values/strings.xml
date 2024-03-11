@@ -12,6 +12,9 @@
     <string name="home_name_temp">Temperature</string>
     <string name="home_name_hum">Humidity</string>
     <string name="home_name_pres">Pressure</string>
+    <string name="home_name_feels">Feels like</string>
     <string name="home_name_illum">Illuminance</string>
     <string name="history_name">History</string>
+    <string name="row_name_phone">Phone</string>
+    <string name="row_name_out">Outside</string>
 </resources>
