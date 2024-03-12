@@ -46,7 +46,6 @@ import fi.metropolia.untop.sensorproject.data.OfflineRepo
 import fi.metropolia.untop.sensorproject.data.SensorDatabase
 import fi.metropolia.untop.sensorproject.data.Setting
 import fi.metropolia.untop.sensorproject.ui.theme.SensorProjectTheme
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity(), SensorEventListener {
@@ -62,19 +61,16 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         initializeViewModelAndDatabase()
         getPermissions()
         initializeSensors()
-        initalizeWorkers()
+        initializeWorkers()
         setContent {
+            val theme by viewModel.theme.observeAsState(true)
             val navController = rememberNavController()
             var navigationSelectedItem by rememberSaveable { mutableIntStateOf(0) }
             LaunchedEffect(Unit) {
-                Log.d("DBG", "LaunchedEffect")
-                viewModel.getAllSettings()
-                Log.d(
-                    "DBG",
-                    "Theme is ${viewModel.theme.value}, Nightmode is ${viewModel.isNightMode.value}"
-                )
+                val settings = viewModel.getAllSettings()
+                viewModel.updateSettings(settings)
             }
-            viewModel.theme.observeAsState().value?.let { it ->
+            theme?.let { it ->
                 SensorProjectTheme(darkTheme = it) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
@@ -146,7 +142,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         }
     }
 
-    private fun initalizeWorkers() {
+    private fun initializeWorkers() {
         val periodicWorkRequest = PeriodicWorkRequestBuilder<ApiWorker>(1, TimeUnit.HOURS).build()
         val initialWorkRequest = OneTimeWorkRequestBuilder<ApiWorker>().build()
         WorkManager.getInstance(this).enqueue(initialWorkRequest)
@@ -185,15 +181,12 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         val settings = listOf(
             Setting(
                 name = "Automatic", description = "Automatically change theme", currentValue = true
-            ), Setting(
+            ),
+            Setting(
                 name = "Theme",
                 description = "Change application theme",
                 currentValue = currentNightMode == Configuration.UI_MODE_NIGHT_YES
-            ), Setting(
-                name = "Language",
-                description = "Change Language",
-                currentValue = Locale.getDefault().language == "en"
-            )
+            ),
         )
         viewModel.insertAllSettings(settings)
     }

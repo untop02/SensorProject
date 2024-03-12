@@ -17,7 +17,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
     val weatherData = MutableLiveData<WeatherResponse>()
     var history = MutableLiveData<List<Item>>(emptyList())
     var currentSettings = MutableLiveData<List<Setting>>(emptyList())
-    var theme = MutableLiveData(false)
+    var theme = MutableLiveData<Boolean?>()
     private var automatic = MutableLiveData(true)
     var isNightMode = MutableLiveData(false)
     var nullSensors = MutableLiveData<List<String>>(emptyList())
@@ -65,18 +65,15 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
         }
     }
 
-    fun getAllSettings() {
-        viewModelScope.launch {
-            try {
-                val settings = sensorRepository.getAllSettings()
-                updateSettings(settings)
-            } catch (e: Exception) {
-                Log.e("MyViewModel", "Error getting settings: ${e.message}")
-            }
+    suspend fun getAllSettings(): List<Setting> {
+        return try {
+            sensorRepository.getAllSettings()
+        } catch (e: Exception) {
+            Log.e("MyViewModel", "Error getting settings: ${e.message}")
+            emptyList()
         }
     }
-
-    private fun updateSettings(settings: List<Setting>) {
+    fun updateSettings(settings: List<Setting>) {
         automatic.postValue(settings[0].currentValue)
 
         val themeValue = if (settings[0].currentValue) {
