@@ -15,7 +15,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
@@ -82,13 +81,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                         color = MaterialTheme.colorScheme.background
                     ) {
                         Scaffold(
-                            floatingActionButton = {
-                                FloatingActionButton(onClick = {
-                                    viewModel.saveSenorsToDatabase()
-                                }) {
-                                    Text(text = "Press")
-                                }
-                            },
                             bottomBar = {
                                 BottomAppBar(
                                     containerColor = MaterialTheme.colorScheme.primaryContainer,
