@@ -110,7 +110,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                                 }
                             },
 
-                        ) { innerPadding ->
+                            ) { innerPadding ->
                             NavHost(
                                 navController = navController,
                                 startDestination = Destinations.Home.route,
@@ -146,7 +146,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     }
 
     private fun initializeWorkers() {
-        val periodicWorkRequest = PeriodicWorkRequestBuilder<ApiWorker>(1, TimeUnit.HOURS).build()
+        val periodicWorkRequest =
+            PeriodicWorkRequestBuilder<ApiWorker>(30, TimeUnit.MINUTES).build()
         val initialWorkRequest = OneTimeWorkRequestBuilder<ApiWorker>().build()
         WorkManager.getInstance(this).enqueue(initialWorkRequest)
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
@@ -163,6 +164,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     val myData = gson.fromJson(resultData, WeatherResponse::class.java)
                     viewModel.weatherData.postValue(myData)
                 }
+                viewModel.saveSenorsToDatabase()
             }
         WorkManager.getInstance(this).getWorkInfoByIdLiveData(initialWorkRequest.id)
             .observe(this) { workInfo ->
@@ -173,6 +175,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     val myData = gson.fromJson(resultData, WeatherResponse::class.java)
                     viewModel.weatherData.postValue(myData)
                 }
+                viewModel.saveSenorsToDatabase()
             }
     }
 
@@ -255,12 +258,23 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
     override fun onSensorChanged(event: SensorEvent) {
-        viewModel.saveSenorsToDatabase()
+
         when (event.sensor.type) {
-            Sensor.TYPE_AMBIENT_TEMPERATURE -> viewModel.ambientTemp.postValue(event.values[0].toDouble())
-            Sensor.TYPE_LIGHT -> viewModel.light.postValue(event.values[0].toDouble())
-            Sensor.TYPE_PRESSURE -> viewModel.pressure.postValue(event.values[0].toDouble())
-            Sensor.TYPE_RELATIVE_HUMIDITY -> viewModel.humidity.postValue(event.values[0].toDouble())
+            Sensor.TYPE_AMBIENT_TEMPERATURE -> {
+                viewModel.ambientTemp.postValue(event.values[0].toDouble())
+            }
+
+            Sensor.TYPE_LIGHT -> {
+                viewModel.light.postValue(event.values[0].toDouble())
+            }
+
+            Sensor.TYPE_PRESSURE -> {
+                viewModel.pressure.postValue(event.values[0].toDouble())
+            }
+
+            Sensor.TYPE_RELATIVE_HUMIDITY -> {
+                viewModel.humidity.postValue(event.values[0].toDouble())
+            }
         }
     }
 }
