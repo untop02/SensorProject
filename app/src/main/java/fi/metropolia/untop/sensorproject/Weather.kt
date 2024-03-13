@@ -48,20 +48,17 @@ fun Weather(modifier: Modifier, viewModel: MyViewModel) {
                 stringResource(id = R.string.home_name_temp),
                 viewModel.weatherData.value?.main?.temp.toString(),
                 " °C"
-            ),
-            ApiSensorData(
+            ), ApiSensorData(
                 R.string.home_name_hum,
                 stringResource(id = R.string.home_name_hum),
                 viewModel.weatherData.value?.main?.humidity.toString(),
                 " %"
-            ),
-            ApiSensorData(
+            ), ApiSensorData(
                 R.string.home_name_pres,
                 stringResource(id = R.string.home_name_pres),
                 viewModel.weatherData.value?.main?.pressure.toString(),
                 " hPa"
-            ),
-            ApiSensorData(
+            ), ApiSensorData(
                 R.string.home_name_illum,
                 stringResource(id = R.string.home_name_feels),
                 viewModel.weatherData.value?.main?.feels_like.toString(),
@@ -83,7 +80,9 @@ fun ApiSensorRow(sensors: List<ApiSensorData>) {
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         for (sensor in sensors) {
-            ApiCard(modifier = Modifier, name = sensor.idName, value = sensor.value, unit = sensor.unit)
+            ApiCard(
+                modifier = Modifier, name = sensor.idName, value = sensor.value, unit = sensor.unit
+            )
         }
     }
 }
@@ -106,7 +105,11 @@ fun ApiCard(
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = value + unit,
+            text = if (value.isEmpty() or (value == "null")) {
+                "Loading..."
+            } else {
+                value + unit
+            },
             modifier = modifier
                 .padding(16.dp)
                 .align(Alignment.CenterHorizontally),
@@ -116,8 +119,5 @@ fun ApiCard(
 }
 
 data class ApiSensorData(
-    val nameResId: Int,
-    val idName: String,
-    val value: String,
-    val unit: String
+    val nameResId: Int, val idName: String, val value: String, val unit: String
 )

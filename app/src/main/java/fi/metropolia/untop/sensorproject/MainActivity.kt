@@ -36,11 +36,8 @@ import androidx.navigation.navArgument
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import com.google.gson.Gson
 import fi.metropolia.untop.sensorproject.api.ApiWorker
-import fi.metropolia.untop.sensorproject.api.WeatherResponse
 import fi.metropolia.untop.sensorproject.data.MyViewModel
 import fi.metropolia.untop.sensorproject.data.OfflineRepo
 import fi.metropolia.untop.sensorproject.data.SensorDatabase
@@ -63,6 +60,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         getPermissions()
         initializeSensors()
         initializeWorkers()
+        viewModel.weatherData.observe(this) {
+            viewModel.saveSenorsToDatabase()
+        }
         setContent {
             val theme by viewModel.theme.observeAsState(true)
             val navController = rememberNavController()
@@ -147,36 +147,12 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     private fun initializeWorkers() {
         val periodicWorkRequest =
-            PeriodicWorkRequestBuilder<ApiWorker>(30, TimeUnit.MINUTES).build()
+            PeriodicWorkRequestBuilder<ApiWorker>(20, TimeUnit.MINUTES).build()
         val initialWorkRequest = OneTimeWorkRequestBuilder<ApiWorker>().build()
         WorkManager.getInstance(this).enqueue(initialWorkRequest)
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "hourly_work", ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest
+            "interval_check", ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest
         )
-
-        // Add a listener to get the result data when the weather API work completes
-        WorkManager.getInstance(this).getWorkInfoByIdLiveData(periodicWorkRequest.id)
-            .observe(this) { workInfo ->
-                if (workInfo != null && workInfo.state == WorkInfo.State.SUCCEEDED) {
-                    val outputData = workInfo.outputData
-                    val resultData = outputData.getString("modified_data")
-                    val gson = Gson()
-                    val myData = gson.fromJson(resultData, WeatherResponse::class.java)
-                    viewModel.weatherData.postValue(myData)
-                }
-                viewModel.saveSenorsToDatabase()
-            }
-        WorkManager.getInstance(this).getWorkInfoByIdLiveData(initialWorkRequest.id)
-            .observe(this) { workInfo ->
-                if (workInfo != null && workInfo.state == WorkInfo.State.SUCCEEDED) {
-                    val outputData = workInfo.outputData
-                    val resultData = outputData.getString("modified_data")
-                    val gson = Gson()
-                    val myData = gson.fromJson(resultData, WeatherResponse::class.java)
-                    viewModel.weatherData.postValue(myData)
-                }
-                viewModel.saveSenorsToDatabase()
-            }
     }
 
     private fun initializeViewModelAndDatabase() {
