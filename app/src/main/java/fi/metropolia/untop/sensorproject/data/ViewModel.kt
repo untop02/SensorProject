@@ -1,10 +1,12 @@
 package fi.metropolia.untop.sensorproject.data
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import fi.metropolia.untop.sensorproject.api.WeatherResponse
+import fi.metropolia.untop.sensorproject.api.WeatherWorkerRepo
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -14,7 +16,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
     val humidity = MutableLiveData(0.0)
     val light = MutableLiveData(0.0)
     val pressure = MutableLiveData(0.0)
-    val weatherData = MutableLiveData<WeatherResponse>()
+    val weatherData: LiveData<WeatherResponse> = WeatherWorkerRepo.getData()
     var history = MutableLiveData<List<Item>>(emptyList())
     var currentSettings = MutableLiveData<List<Setting>>(emptyList())
     var theme = MutableLiveData<Boolean>()
@@ -55,6 +57,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
             }
         }
     }
+
     fun updateSettingValue(name: String, newValue: Boolean) {
         viewModelScope.launch {
             try {
@@ -73,6 +76,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
             emptyList()
         }
     }
+
     fun updateSettings(settings: List<Setting>) {
         val automaticValue = settings.getOrNull(0)?.currentValue ?: true
         automatic.postValue(automaticValue)
@@ -92,11 +96,9 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
         currentSettings.postValue(settings)
     }
 
-
     fun saveSenorsToDatabase() {
         val newItem = Item(
-            LocalDateTime.now()
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
             ambientTemp.value ?: 0.0,
             humidity.value ?: 0.0,
             pressure.value ?: 0.0,

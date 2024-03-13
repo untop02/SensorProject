@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.work.CoroutineWorker
-import androidx.work.Data
 import androidx.work.WorkerParameters
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -18,10 +17,14 @@ class ApiWorker(appContext: Context, params: WorkerParameters) :
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     override suspend fun doWork(): Result {
         return try {
+            Log.d("DBG", "Started worker")
+            val gson = Gson()
+            val myData = gson.fromJson(
+                weatherData(getLocation(applicationContext)), WeatherResponse::class.java
+            )
+            WeatherWorkerRepo.updateData(myData)
 
-            val results = Data.Builder()
-                .putString("modified_data", weatherData(getLocation(applicationContext))).build()
-            Result.success(results)
+            Result.success()
         } catch (e: Exception) {
             Log.d("DBG", "CRASHED WORKER")
             Result.failure()
@@ -29,9 +32,11 @@ class ApiWorker(appContext: Context, params: WorkerParameters) :
     }
 
     private suspend fun weatherData(location: Pair<Double, Double>?): String? {
+        Log.d("DBG", "Started worker weather fetch")
         if (location != null) {
             val serverResp = RetrofitInstance.service.getWeather(location.first, location.second)
             val gson = Gson()
+            Log.d("DBG", "Worker serverResp $serverResp")
             return gson.toJson(serverResp)
         }
         return null
