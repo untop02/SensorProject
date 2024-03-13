@@ -195,6 +195,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         viewModel.insertAllSettings(settings)
     }
 
+    //asking user for internet, bt and location permissions
     private fun getPermissions() {
         val requiredPermissions: Array<String> = arrayOf(
             Manifest.permission.BLUETOOTH,
@@ -220,6 +221,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         requestPermissionsLauncher.launch(requiredPermissions)
     }
 
+    //starting the phones internal sensors
     private fun initializeSensors() {
         mSensorManager = getSystemService(Context.SENSOR_SERVICE) as? SensorManager
         mTemp = mSensorManager?.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
@@ -240,6 +242,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         viewModel.nullSensors.postValue(nullSensors)
     }
 
+    //continuing to track phones internal sensors when user opens app up again
     override fun onResume() {
         super.onResume()
         mSensorManager?.registerListener(this, mTemp, SensorManager.SENSOR_DELAY_NORMAL)
@@ -248,11 +251,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         mSensorManager?.registerListener(this, mHumidity, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
+    //stopping the tracking of sensors when exiting the app
     override fun onPause() {
         super.onPause()
         mSensorManager?.unregisterListener(this)
     }
 
+    //tracking sensors reported data and changing variables when there is a change
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
     override fun onSensorChanged(event: SensorEvent) {
         viewModel.saveSenorsToDatabase()

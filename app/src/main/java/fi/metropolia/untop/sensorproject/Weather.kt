@@ -31,7 +31,7 @@ fun Weather(modifier: Modifier, viewModel: MyViewModel) {
             .padding(horizontal = 16.dp)
             .padding(top = 16.dp),
     ) {
-        Log.d("Weather", viewModel.weatherData.observeAsState().value.toString())
+        //Homescreen weather apis title "Outside"
         Text(
             text = stringResource(id = R.string.row_name_out),
             modifier = modifier
@@ -88,6 +88,7 @@ fun ApiSensorRow(sensors: List<ApiSensorData>) {
     }
 }
 
+//Layout for api data cards displaying temp, humidity...
 @Composable
 fun ApiCard(
     modifier: Modifier, name: String, value: String, unit: String
