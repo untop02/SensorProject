@@ -17,7 +17,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
     val weatherData = MutableLiveData<WeatherResponse>()
     var history = MutableLiveData<List<Item>>(emptyList())
     var currentSettings = MutableLiveData<List<Setting>>(emptyList())
-    var theme = MutableLiveData<Boolean?>()
+    var theme = MutableLiveData<Boolean>()
     private var automatic = MutableLiveData(true)
     var isNightMode = MutableLiveData(false)
     var nullSensors = MutableLiveData<List<String>>(emptyList())
@@ -45,6 +45,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
     }
 
     fun insertAllSettings(settings: List<Setting>) {
+        Log.d("DBG", settings.toString())
         viewModelScope.launch {
             try {
                 sensorRepository.insertAllSettings(settings)
@@ -54,7 +55,6 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
             }
         }
     }
-
     fun updateSettingValue(name: String, newValue: Boolean) {
         viewModelScope.launch {
             try {
@@ -74,34 +74,29 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
         }
     }
     fun updateSettings(settings: List<Setting>) {
-        automatic.postValue(settings[0].currentValue)
+        val automaticValue = settings.getOrNull(0)?.currentValue ?: true
+        automatic.postValue(automaticValue)
 
-        val themeValue = if (settings[0].currentValue) {
+        val themeValue = if (automaticValue) {
             isNightMode.value
         } else {
-            settings[1].currentValue
+            settings.getOrNull(1)?.currentValue
         }
 
-        theme.postValue(themeValue)
-
-        if (settings[0].currentValue) {
-            settings[1].currentValue = true
-            try {
+        themeValue?.let { newValue ->
+            theme.postValue(newValue)
+            if (automaticValue && !newValue) {
                 updateSettingValue("Theme", true)
-            } catch (e: Exception) {
-                Log.e("MyViewModel", "Error Updating setting: ${e.message}")
             }
         }
-
-        Log.d("DBG", "Theme is $themeValue")
-
         currentSettings.postValue(settings)
     }
+
 
     fun saveSenorsToDatabase() {
         val newItem = Item(
             LocalDateTime.now()
-                .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")),
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
             ambientTemp.value ?: 0.0,
             humidity.value ?: 0.0,
             pressure.value ?: 0.0,

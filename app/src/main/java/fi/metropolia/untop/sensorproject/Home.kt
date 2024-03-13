@@ -8,13 +8,22 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.DrawModifier
@@ -41,8 +50,11 @@ import fi.metropolia.untop.sensorproject.data.SensorDatabase
 import java.math.RoundingMode
 import java.text.DecimalFormat
 
+lateinit var nullSensors: State<List<String>?>
+
 @Composable
 fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostController) {
+    nullSensors = viewModel.nullSensors.observeAsState()
     Column {
         Box(
             modifier = Modifier,
@@ -55,7 +67,12 @@ fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostContr
                     .padding(top = 16.dp)
             ) {
                 val sensors = listOf(
-                    SensorData(R.string.home_name_temp,"Temperature", viewModel.ambientTemp," °C"),
+                    SensorData(
+                        R.string.home_name_temp,
+                        "Temperature",
+                        viewModel.ambientTemp,
+                        " °C"
+                    ),
                     SensorData(R.string.home_name_hum, "Humidity", viewModel.humidity, " %"),
                     SensorData(R.string.home_name_pres, "Pressure", viewModel.pressure, " hPa"),
                     SensorData(R.string.home_name_illum, "Illuminance", viewModel.light, " lx")
@@ -71,7 +88,7 @@ fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostContr
                     fontWeight = FontWeight.Bold
                 )
                 for (chunk in sensors.chunked(2)) {
-                    SensorRow(chunk, navController, viewModel)
+                    SensorRow(chunk, navController)
                 }
             }
         }
@@ -83,8 +100,8 @@ fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostContr
 fun SensorRow(
     sensors: List<SensorData>,
     navController: NavHostController,
-    viewModel: MyViewModel
 ) {
+    var showAlert by rememberSaveable { mutableStateOf(false) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -92,13 +109,25 @@ fun SensorRow(
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         for (sensor in sensors) {
+            val isEnabled = nullSensors.value?.contains(sensor.idName) != true
             CustomCard(
-                modifier = if (viewModel.nullSensors.value?.contains(sensor.idName) == true) Modifier.disabled() else Modifier,
+                modifier = Modifier
+                    .width(170.dp)
+                    .then(if (isEnabled) Modifier else Modifier.disabled())
+                    .clickable {
+                        if (isEnabled) {
+                            navController.navigate(Destinations.Graph.route.plus("?observedName=${sensor.idName}"))
+                        } else {
+                            showAlert = true
+                        }
+                    },
                 name = stringResource(id = sensor.nameResId),
                 value = sensor.value.observeAsState(0.0),
-                navController = navController,
-                unit = sensor.unit
+                unit = sensor.unit,
             )
+        }
+        if (showAlert) {
+            NoSensorAlert(onDismiss = { showAlert = false })
         }
     }
 }
@@ -108,34 +137,58 @@ fun CustomCard(
     modifier: Modifier,
     name: String,
     value: State<Double>,
-    navController: NavHostController,
-    unit: String
+    unit: String,
 ) {
     val df = DecimalFormat("#.##")
     df.roundingMode = RoundingMode.CEILING
     ElevatedCard(
+        modifier = modifier,
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
         ),
-        modifier = modifier
-            .width(170.dp)
-            .clickable { navController.navigate(Destinations.Graph.route.plus("?observedName=$name")) }
     ) {
         Text(
             text = name,
-            modifier = modifier
+            modifier = Modifier
                 .padding(16.dp)
                 .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = df.format(value.value) + unit, modifier = modifier
+            text = df.format(value.value) + unit, modifier = Modifier
                 .padding(16.dp)
                 .align(Alignment.CenterHorizontally), textAlign = TextAlign.Center
         )
     }
 }
+
+@Composable
+fun NoSensorAlert(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(Icons.Default.Info, contentDescription = "Info icon")
+        },
+        text = { Text(textAlign = TextAlign.Center, text = stringResource(id = R.string.alert_desc)) },
+        confirmButton = {
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .fillMaxWidth()
+            ) {
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.Center)
+                ) {
+                    Text(text = "OK")
+                }
+            }
+        }
+    )
+}
+
+
 
 class GreyScaleModifier : DrawModifier {
     override fun ContentDrawScope.draw() {

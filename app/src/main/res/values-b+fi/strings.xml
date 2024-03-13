@@ -17,5 +17,7 @@
     <string name="home_name_feels">Tuntuu</string>
     <string name="row_name_phone">Puhelin</string>
     <string name="row_name_out">Ulkona</string>
+    <string name="alert_desc">Puhelimessa ei kyseistä sensoria!</string>
+    <string name="history_no_data">Ei dataa mitä näyttää!</string>
 
 </resources>

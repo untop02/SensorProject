@@ -1,4 +1,4 @@
-package fi.metropolia.untop.sensorproject
+package fi.metropolia.untop.sensorproject.graphs
 
 import android.graphics.Typeface
 import androidx.compose.material3.MaterialTheme

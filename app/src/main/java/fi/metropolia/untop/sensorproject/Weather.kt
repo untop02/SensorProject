@@ -65,7 +65,7 @@ fun Weather(modifier: Modifier, viewModel: MyViewModel) {
                 R.string.home_name_illum,
                 stringResource(id = R.string.home_name_feels),
                 viewModel.weatherData.value?.main?.feels_like.toString(),
-                " lx"
+                " °C"
             )
         )
         for (chunk in sensors.chunked(2)) {

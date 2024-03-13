@@ -45,6 +45,7 @@ import fi.metropolia.untop.sensorproject.data.MyViewModel
 import fi.metropolia.untop.sensorproject.data.OfflineRepo
 import fi.metropolia.untop.sensorproject.data.SensorDatabase
 import fi.metropolia.untop.sensorproject.data.Setting
+import fi.metropolia.untop.sensorproject.graphs.Graph
 import fi.metropolia.untop.sensorproject.ui.theme.SensorProjectTheme
 import java.util.concurrent.TimeUnit
 
@@ -69,6 +70,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             LaunchedEffect(Unit) {
                 val settings = viewModel.getAllSettings()
                 viewModel.updateSettings(settings)
+                viewModel.getAllItems()
             }
             theme?.let { it ->
                 SensorProjectTheme(darkTheme = it) {
@@ -107,6 +109,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                                         }
                                 }
                             },
+
                         ) { innerPadding ->
                             NavHost(
                                 navController = navController,
@@ -117,7 +120,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                                     Home(modifier = Modifier, viewModel, navController)
                                 }
                                 composable(Destinations.History.route) {
-                                    History(modifier = Modifier, viewModel, navController)
+                                    History(modifier = Modifier, viewModel)
                                 }
                                 composable(Destinations.Settings.route) {
                                     Settings(viewModel)
@@ -177,6 +180,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         database = SensorDatabase.getDatabase(this)
         viewModel = MyViewModel(OfflineRepo(database.itemDao(), database.settingsDao()))
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        Log.d("DBG", (currentNightMode == Configuration.UI_MODE_NIGHT_YES).toString())
         viewModel.isNightMode.postValue(currentNightMode == Configuration.UI_MODE_NIGHT_YES)
         val settings = listOf(
             Setting(
@@ -251,6 +255,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
     override fun onSensorChanged(event: SensorEvent) {
+        viewModel.saveSenorsToDatabase()
         when (event.sensor.type) {
             Sensor.TYPE_AMBIENT_TEMPERATURE -> viewModel.ambientTemp.postValue(event.values[0].toDouble())
             Sensor.TYPE_LIGHT -> viewModel.light.postValue(event.values[0].toDouble())
