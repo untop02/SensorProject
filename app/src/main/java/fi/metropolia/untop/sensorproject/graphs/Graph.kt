@@ -31,11 +31,9 @@ import androidx.compose.ui.unit.sp
 import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
 import com.patrykandpatrick.vico.compose.chart.CartesianChartHost
-import com.patrykandpatrick.vico.compose.chart.layer.rememberColumnCartesianLayer
 import com.patrykandpatrick.vico.compose.chart.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.chart.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.chart.scroll.rememberChartScrollState
-import com.patrykandpatrick.vico.compose.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.component.shape.shader.color
@@ -48,7 +46,6 @@ import com.patrykandpatrick.vico.core.chart.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.core.component.shape.Shapes
 import com.patrykandpatrick.vico.core.component.shape.shader.DynamicShaders
 import com.patrykandpatrick.vico.core.model.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.model.columnSeries
 import com.patrykandpatrick.vico.core.model.lineSeries
 import fi.metropolia.untop.sensorproject.R
 import fi.metropolia.untop.sensorproject.data.Item
@@ -85,26 +82,28 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
     LaunchedEffect(history, filteredHistory) {
         modelProducer.tryRunTransaction {
             val dataTemperature = filteredHistory.map { it.temperature }
-            val dataHumidity =  filteredHistory.map { it.humidity }
+            val dataHumidity = filteredHistory.map { it.humidity }
             val dataPressure = filteredHistory.map { it.pressure }
-            val dataIlluminance =   filteredHistory.map { it.illuminance }
+            val dataIlluminance = filteredHistory.map { it.illuminance }
             val dataApiTemperature = filteredHistory.map { it.temperatureAPI }
             val dataApiHumidity = filteredHistory.map { it.humidityAPI }
             val dataApiPressure = filteredHistory.map { it.pressureAPI }
 
             when (name) {
                 "Temperature" -> lineSeries { series(dataTemperature) }
-                "Humidity" -> columnSeries { series(dataHumidity) }
+                "Humidity" -> lineSeries { series(dataHumidity) }
                 "Pressure" -> lineSeries { series(dataPressure) }
-                "Illuminance" -> columnSeries { series(dataIlluminance) }
+                "Illuminance" -> lineSeries { series(dataIlluminance) }
                 else -> {
-                    lineSeries { series(dataTemperature) }
-                    columnSeries { series(dataIlluminance) }
-                    lineSeries { series(dataPressure) }
-                    columnSeries { series(dataHumidity) }
-                    lineSeries { series(dataApiTemperature) }
-                    columnSeries { series(dataApiHumidity) }
-                    lineSeries { series(dataApiPressure) }
+                    lineSeries {
+                        series(dataTemperature)
+                        series(dataIlluminance)
+                        series(dataPressure)
+                        series(dataHumidity)
+                        series(dataApiTemperature)
+                        series(dataApiHumidity)
+                        series(dataApiPressure)
+                    }
                 }
             }
         }
@@ -131,28 +130,9 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
             CartesianChartHost(
                 rememberCartesianChart(
                     rememberLineCartesianLayer(
-                        lines = listOf(
-                            LineCartesianLayer.LineSpec(
-                                shader = DynamicShaders.color(
-                                    colorRed
-                                )
-                            )
-                        )
-                    ),
-                    rememberColumnCartesianLayer(
-                        columns = listOf(rememberLineComponent(color = colorBlue))
-                    ),
-                    rememberLineCartesianLayer(
-                        lines = listOf(
-                            LineCartesianLayer.LineSpec(
-                                shader = DynamicShaders.color(
-                                    colorGreen
-                                )
-                            )
-                        )
-                    ),
-                    rememberColumnCartesianLayer(
-                        columns = listOf(rememberLineComponent(color = colorPink))
+                        lines = chartColors.map {
+                            LineCartesianLayer.LineSpec(shader = DynamicShaders.color(it))
+                        }
                     ),
                     startAxis = rememberStartAxis(
                         label = rememberTextComponent(
@@ -263,7 +243,8 @@ private val colorRed = Color(0xFFFF0000)
 private val colorYellow = Color(0xFFFFEB3B)
 private val colorViolet = Color(0xFF651FFF)
 private val colorOrange = Color(0xFFDD5B00)
-val chartColors = listOf(colorRed, colorBlue, colorGreen, colorPink, colorYellow, colorViolet, colorOrange)
+val chartColors =
+    listOf(colorRed, colorBlue, colorGreen, colorPink, colorYellow, colorViolet, colorOrange)
 private val legendItemLabelTextSize = 12.sp
 private val legendItemIconSize = 8.dp
 private val legendItemIconPaddingValue = 10.dp
