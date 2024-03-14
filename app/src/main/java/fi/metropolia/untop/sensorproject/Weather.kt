@@ -1,6 +1,5 @@
 package fi.metropolia.untop.sensorproject
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +11,6 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,7 +29,7 @@ fun Weather(modifier: Modifier, viewModel: MyViewModel) {
             .padding(horizontal = 16.dp)
             .padding(top = 16.dp),
     ) {
-        Log.d("Weather", viewModel.weatherData.observeAsState().value.toString())
+        //Homescreen weather apis title "Outside"
         Text(
             text = stringResource(id = R.string.row_name_out),
             modifier = modifier
@@ -48,20 +46,17 @@ fun Weather(modifier: Modifier, viewModel: MyViewModel) {
                 stringResource(id = R.string.home_name_temp),
                 viewModel.weatherData.value?.main?.temp.toString(),
                 " °C"
-            ),
-            ApiSensorData(
+            ), ApiSensorData(
                 R.string.home_name_hum,
                 stringResource(id = R.string.home_name_hum),
                 viewModel.weatherData.value?.main?.humidity.toString(),
                 " %"
-            ),
-            ApiSensorData(
+            ), ApiSensorData(
                 R.string.home_name_pres,
                 stringResource(id = R.string.home_name_pres),
                 viewModel.weatherData.value?.main?.pressure.toString(),
                 " hPa"
-            ),
-            ApiSensorData(
+            ), ApiSensorData(
                 R.string.home_name_illum,
                 stringResource(id = R.string.home_name_feels),
                 viewModel.weatherData.value?.main?.feels_like.toString(),
@@ -83,11 +78,14 @@ fun ApiSensorRow(sensors: List<ApiSensorData>) {
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         for (sensor in sensors) {
-            ApiCard(modifier = Modifier, name = sensor.idName, value = sensor.value, unit = sensor.unit)
+            ApiCard(
+                modifier = Modifier, name = sensor.idName, value = sensor.value, unit = sensor.unit
+            )
         }
     }
 }
 
+//Layout for api data cards displaying temp, humidity...
 @Composable
 fun ApiCard(
     modifier: Modifier, name: String, value: String, unit: String
@@ -106,7 +104,11 @@ fun ApiCard(
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = value + unit,
+            text = if (value.isEmpty() or (value == "null")) {
+                stringResource(R.string.loading)
+            } else {
+                value + unit
+            },
             modifier = modifier
                 .padding(16.dp)
                 .align(Alignment.CenterHorizontally),
@@ -116,8 +118,5 @@ fun ApiCard(
 }
 
 data class ApiSensorData(
-    val nameResId: Int,
-    val idName: String,
-    val value: String,
-    val unit: String
+    val nameResId: Int, val idName: String, val value: String, val unit: String
 )

@@ -25,5 +25,10 @@
     <string name="gatt_connection_success">Yhteys laitteeseen luotu</string>
     <string name="gatt_connection_connecting">Yhistetään laitteeseen..</string>
     <string name="gatt_connection_disconnected">Yhteys laitteeseen katkaistu</string>
+    <string name="all">Kaikki</string>
+    <string name="month">Kuukausi</string>
+    <string name="week">Viikko</string>
+    <string name="day">Päivä</string>
+    <string name="loading">Lataa...</string>
 
 </resources>

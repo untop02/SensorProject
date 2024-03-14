@@ -8,11 +8,13 @@ import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import fi.metropolia.untop.sensorproject.api.WeatherResponse
+import fi.metropolia.untop.sensorproject.api.WeatherWorkerRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -25,7 +27,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
     val humidity = MutableLiveData(0.0)
     val light = MutableLiveData(0.0)
     val pressure = MutableLiveData(0.0)
-    val weatherData = MutableLiveData<WeatherResponse>()
+    val weatherData: LiveData<WeatherResponse> = WeatherWorkerRepo.getData()
 
     //History
     var history = MutableLiveData<List<Item>>(emptyList())
@@ -151,11 +153,9 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
         currentSettings.postValue(settings)
     }
 
-
     fun saveSenorsToDatabase() {
         val newItem = Item(
-            LocalDateTime.now()
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
             ambientTemp.value ?: 0.0,
             humidity.value ?: 0.0,
             pressure.value ?: 0.0,

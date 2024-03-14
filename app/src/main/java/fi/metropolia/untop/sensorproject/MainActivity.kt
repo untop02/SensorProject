@@ -39,11 +39,8 @@ import androidx.navigation.navArgument
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import com.google.gson.Gson
 import fi.metropolia.untop.sensorproject.api.ApiWorker
-import fi.metropolia.untop.sensorproject.api.WeatherResponse
 import fi.metropolia.untop.sensorproject.data.MyViewModel
 import fi.metropolia.untop.sensorproject.data.OfflineRepo
 import fi.metropolia.untop.sensorproject.data.SensorDatabase
@@ -91,6 +88,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         getPermissions(requiredPermissions, requestPermissionsLauncher)
         initializeSensors()
         initializeWorkers()
+        viewModel.weatherData.observe(this) {
+            viewModel.saveSenorsToDatabase()
+        }
         setContent {
             val theme by viewModel.theme.observeAsState(true)
             val navController = rememberNavController()
@@ -184,34 +184,13 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     }
 
     private fun initializeWorkers() {
-        val periodicWorkRequest = PeriodicWorkRequestBuilder<ApiWorker>(1, TimeUnit.HOURS).build()
+        val periodicWorkRequest =
+            PeriodicWorkRequestBuilder<ApiWorker>(20, TimeUnit.MINUTES).build()
         val initialWorkRequest = OneTimeWorkRequestBuilder<ApiWorker>().build()
         WorkManager.getInstance(this).enqueue(initialWorkRequest)
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "hourly_work", ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest
+            "interval_check", ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest
         )
-
-        // Add a listener to get the result data when the weather API work completes
-        WorkManager.getInstance(this).getWorkInfoByIdLiveData(periodicWorkRequest.id)
-            .observe(this) { workInfo ->
-                if (workInfo != null && workInfo.state == WorkInfo.State.SUCCEEDED) {
-                    val outputData = workInfo.outputData
-                    val resultData = outputData.getString("modified_data")
-                    val gson = Gson()
-                    val myData = gson.fromJson(resultData, WeatherResponse::class.java)
-                    viewModel.weatherData.postValue(myData)
-                }
-            }
-        WorkManager.getInstance(this).getWorkInfoByIdLiveData(initialWorkRequest.id)
-            .observe(this) { workInfo ->
-                if (workInfo != null && workInfo.state == WorkInfo.State.SUCCEEDED) {
-                    val outputData = workInfo.outputData
-                    val resultData = outputData.getString("modified_data")
-                    val gson = Gson()
-                    val myData = gson.fromJson(resultData, WeatherResponse::class.java)
-                    viewModel.weatherData.postValue(myData)
-                }
-            }
     }
 
     private fun initializeViewModelAndDatabase() {
@@ -240,6 +219,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         requestPermissionsLauncher.launch(requiredPermissions)
     }
 
+    //starting the phones internal sensors
     private fun initializeSensors() {
         mSensorManager = getSystemService(Context.SENSOR_SERVICE) as? SensorManager
         mTemp = mSensorManager?.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
@@ -260,6 +240,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         viewModel.nullSensors.postValue(nullSensors)
     }
 
+    //continuing to track phones internal sensors when user opens app up again
     override fun onResume() {
         super.onResume()
         mSensorManager?.registerListener(this, mTemp, SensorManager.SENSOR_DELAY_NORMAL)
@@ -268,19 +249,32 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         mSensorManager?.registerListener(this, mHumidity, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
+    //stopping the tracking of sensors when exiting the app
     override fun onPause() {
         super.onPause()
         mSensorManager?.unregisterListener(this)
     }
 
+    //tracking sensors reported data and changing variables when there is a change
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
     override fun onSensorChanged(event: SensorEvent) {
-        viewModel.saveSenorsToDatabase()
+
         when (event.sensor.type) {
-            Sensor.TYPE_AMBIENT_TEMPERATURE -> viewModel.ambientTemp.postValue(event.values[0].toDouble())
-            Sensor.TYPE_LIGHT -> viewModel.light.postValue(event.values[0].toDouble())
-            Sensor.TYPE_PRESSURE -> viewModel.pressure.postValue(event.values[0].toDouble())
-            Sensor.TYPE_RELATIVE_HUMIDITY -> viewModel.humidity.postValue(event.values[0].toDouble())
+            Sensor.TYPE_AMBIENT_TEMPERATURE -> {
+                viewModel.ambientTemp.postValue(event.values[0].toDouble())
+            }
+
+            Sensor.TYPE_LIGHT -> {
+                viewModel.light.postValue(event.values[0].toDouble())
+            }
+
+            Sensor.TYPE_PRESSURE -> {
+                viewModel.pressure.postValue(event.values[0].toDouble())
+            }
+
+            Sensor.TYPE_RELATIVE_HUMIDITY -> {
+                viewModel.humidity.postValue(event.values[0].toDouble())
+            }
         }
     }
 }

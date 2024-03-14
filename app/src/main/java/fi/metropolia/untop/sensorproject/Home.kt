@@ -82,6 +82,7 @@ fun Home(
                     SensorData(R.string.home_name_pres, "Pressure", viewModel.pressure, " hPa"),
                     SensorData(R.string.home_name_illum, "Illuminance", viewModel.light, " lx")
                 )
+                //Homescreen title "Phone"
                 Text(
                     text = stringResource(id = R.string.row_name_phone),
                     modifier = Modifier
@@ -144,6 +145,7 @@ fun SensorRow(
     }
 }
 
+//Layout for phone sensor data cards displaying temp, humidity...
 @Composable
 fun CustomCard(
     modifier: Modifier,
