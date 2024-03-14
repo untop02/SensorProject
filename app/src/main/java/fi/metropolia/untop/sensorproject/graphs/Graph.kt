@@ -167,28 +167,28 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
                 interval = TimeInterval.DAY,
                 selectedInterval = selectedTimeInterval,
                 onClick = { selectedTimeInterval = TimeInterval.DAY },
-                text = "Day"
+                text = stringResource(R.string.day)
             )
 
             TimeButton(
                 interval = TimeInterval.WEEK,
                 selectedInterval = selectedTimeInterval,
                 onClick = { selectedTimeInterval = TimeInterval.WEEK },
-                text = "Week"
+                text = stringResource(R.string.week)
             )
 
             TimeButton(
                 interval = TimeInterval.MONTH,
                 selectedInterval = selectedTimeInterval,
                 onClick = { selectedTimeInterval = TimeInterval.MONTH },
-                text = "Month"
+                text = stringResource(R.string.month)
             )
 
             TimeButton(
                 interval = TimeInterval.All,
                 selectedInterval = selectedTimeInterval,
                 onClick = { selectedTimeInterval = TimeInterval.All },
-                text = "All"
+                text = stringResource(R.string.all)
             )
         }
     }

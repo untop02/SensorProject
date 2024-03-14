@@ -19,4 +19,9 @@
     <string name="row_name_out">Outside</string>
     <string name="alert_desc">Your phone does not have this sensor!</string>
     <string name="history_no_data">No data to show sorry bro!</string>
+    <string name="all">All</string>
+    <string name="month">Month</string>
+    <string name="week">Week</string>
+    <string name="day">Day</string>
+    <string name="loading">Loading...</string>
 </resources>

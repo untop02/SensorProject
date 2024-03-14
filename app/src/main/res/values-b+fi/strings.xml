@@ -19,5 +19,10 @@
     <string name="row_name_out">Ulkona</string>
     <string name="alert_desc">Puhelimessa ei kyseistä sensoria!</string>
     <string name="history_no_data">Ei dataa mitä näyttää!</string>
+    <string name="all">Kaikki</string>
+    <string name="month">Kuukausi</string>
+    <string name="week">Viikko</string>
+    <string name="day">Päivä</string>
+    <string name="loading">Lataa...</string>
 
 </resources>
