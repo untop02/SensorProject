@@ -57,10 +57,11 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var mHumidity: Sensor? = null
     private lateinit var database: SensorDatabase
     private lateinit var viewModel: MyViewModel
+    private lateinit var requestPermissionsLauncher: ActivityResultLauncher<Array<String>>
+    private lateinit var permissionsGranted: HashMap<String, Boolean>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val permissionsGranted = HashMap<String, Boolean>()
         val requiredPermissions: Array<String> = arrayOf(
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN,
@@ -70,23 +71,12 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             Manifest.permission.BLUETOOTH_SCAN,
             Manifest.permission.BLUETOOTH_CONNECT
         )
+        permissionsGranted = HashMap()
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
-        val requestPermissionsLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-                permissions.entries.forEach { entry ->
-                    if (entry.value) {
-                        permissionsGranted[entry.key] = entry.value
-                        Log.d("PermissionGranted", "Permission ${entry.key} is granted")
-                    } else {
-                        Log.d("PermissionDenied", "Permission ${entry.key} is denied")
-                    }
-                }
-            }
+        getPermissions(requiredPermissions)
         initializeViewModelAndDatabase()
-        getPermissions(requiredPermissions, requestPermissionsLauncher)
         initializeSensors()
-        initializeWorkers()
         insertMockData()
         viewModel.weatherData.observe(this) {
             viewModel.saveSenorsToDatabase()
@@ -185,18 +175,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     private fun insertMockData() {
         val list = createItemsAtLeastTwoMonthsBack()
-        list.forEach{ item -> viewModel.insertItem(item)}
+        list.forEach { item -> viewModel.insertItem(item) }
     }
 
-    private fun initializeWorkers() {
-        val periodicWorkRequest =
-            PeriodicWorkRequestBuilder<ApiWorker>(20, TimeUnit.MINUTES).build()
-        val initialWorkRequest = OneTimeWorkRequestBuilder<ApiWorker>().build()
-        WorkManager.getInstance(this).enqueue(initialWorkRequest)
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "interval_check", ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest
-        )
-    }
 
     private fun initializeViewModelAndDatabase() {
         database = SensorDatabase.getDatabase(this)
@@ -218,10 +199,38 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     }
 
     private fun getPermissions(
-        requiredPermissions: Array<String>,
-        requestPermissionsLauncher: ActivityResultLauncher<Array<String>>
+        requiredPermissions: Array<String>
     ) {
+        requestPermissionsLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                permissions.entries.forEach { entry ->
+                    if (entry.value) {
+                        permissionsGranted[entry.key] = entry.value
+                        Log.d("DBG", "Permission ${entry.key} is granted")
+                    } else {
+                        Log.d("DBG", "Permission ${entry.key} is denied")
+                    }
+                }
+                if (permissionsGranted.contains("android.permission.ACCESS_FINE_LOCATION")
+                    && permissionsGranted.contains("android.permission.ACCESS_COARSE_LOCATION")
+                ) {
+                    initializeWorkers()
+                }
+            }
+
+        Log.d("DBG", "Launching permissions request")
         requestPermissionsLauncher.launch(requiredPermissions)
+    }
+
+
+    private fun initializeWorkers() {
+            val periodicWorkRequest =
+                PeriodicWorkRequestBuilder<ApiWorker>(20, TimeUnit.MINUTES).build()
+            val initialWorkRequest = OneTimeWorkRequestBuilder<ApiWorker>().build()
+            WorkManager.getInstance(this).enqueue(initialWorkRequest)
+            WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                "interval_check", ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest
+            )
     }
 
     //starting the phones internal sensors

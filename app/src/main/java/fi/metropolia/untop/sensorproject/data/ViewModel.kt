@@ -8,8 +8,8 @@ import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -48,7 +48,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
     var nullSensors = MutableLiveData<List<String>>(emptyList())
 
     //Gatt
-    val connectionState = MutableLiveData("                                                                                                             ")
+    val connectionState = MutableLiveData("")
     fun scanDevices(scanner: BluetoothLeScanner, context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             val settings = ScanSettings.Builder()

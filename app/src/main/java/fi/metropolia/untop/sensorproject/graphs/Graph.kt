@@ -160,7 +160,6 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
                         ), itemPlacer = remember {
                             AxisItemPlacer.Vertical.default(maxItemCount = { 5 })
                         }),
-                    //bottomAxis = rememberBottomAxis(guideline = null, valueFormatter = { it, _, _ -> it.toString() }),
                     bottomAxis = rememberBottomAxis(guideline = null),
                     legend = rememberLegend(name, names)
                 ),
