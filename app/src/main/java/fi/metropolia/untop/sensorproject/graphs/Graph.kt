@@ -69,24 +69,28 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
     var selectedTimeInterval by remember { mutableStateOf(TimeInterval.All) }
     val names = listOf(
         stringResource(id = R.string.home_name_temp),
-        stringResource(id = R.string.home_name_hum),
-        stringResource(id = R.string.home_name_pres),
         stringResource(id = R.string.home_name_illum),
+        stringResource(id = R.string.home_name_pres),
+        stringResource(id = R.string.home_name_hum),
+        stringResource(id = R.string.graph_name_apiTemp),
+        stringResource(id = R.string.graph_name_apiHumi),
+        stringResource(id = R.string.graph_name_apiPress),
     )
-
     val history by viewModel.history.observeAsState(emptyList())
 
     var filteredHistory by rememberSaveable { mutableStateOf(history) }
 
     val modelProducer = remember { CartesianChartModelProducer.build() }
 
-
-    LaunchedEffect(history) {
+    LaunchedEffect(history, filteredHistory) {
         modelProducer.tryRunTransaction {
             val dataTemperature = filteredHistory.map { it.temperature }
             val dataHumidity =  filteredHistory.map { it.humidity }
             val dataPressure = filteredHistory.map { it.pressure }
             val dataIlluminance =   filteredHistory.map { it.illuminance }
+            val dataApiTemperature = filteredHistory.map { it.temperatureAPI }
+            val dataApiHumidity = filteredHistory.map { it.humidityAPI }
+            val dataApiPressure = filteredHistory.map { it.pressureAPI }
 
             when (name) {
                 "Temperature" -> lineSeries { series(dataTemperature) }
@@ -95,14 +99,16 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
                 "Illuminance" -> columnSeries { series(dataIlluminance) }
                 else -> {
                     lineSeries { series(dataTemperature) }
-                    columnSeries { series(dataHumidity) }
-                    lineSeries { series(dataPressure) }
                     columnSeries { series(dataIlluminance) }
+                    lineSeries { series(dataPressure) }
+                    columnSeries { series(dataHumidity) }
+                    lineSeries { series(dataApiTemperature) }
+                    columnSeries { series(dataApiHumidity) }
+                    lineSeries { series(dataApiPressure) }
                 }
             }
         }
     }
-
 
     LaunchedEffect(selectedTimeInterval, history) {
         filteredHistory = when (selectedTimeInterval) {
@@ -154,6 +160,7 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
                         ), itemPlacer = remember {
                             AxisItemPlacer.Vertical.default(maxItemCount = { 5 })
                         }),
+                    //bottomAxis = rememberBottomAxis(guideline = null, valueFormatter = { it, _, _ -> it.toString() }),
                     bottomAxis = rememberBottomAxis(guideline = null),
                     legend = rememberLegend(name, names)
                 ),
@@ -254,7 +261,10 @@ private val colorBlue = Color(0xff0000ff)
 private val colorPink = Color(0xffff00ff)
 private val colorGreen = Color(0xFF00FF00)
 private val colorRed = Color(0xFFFF0000)
-val chartColors = listOf(colorRed, colorBlue, colorGreen, colorPink)
+private val colorYellow = Color(0xFFFFEB3B)
+private val colorViolet = Color(0xFF651FFF)
+private val colorOrange = Color(0xFFDD5B00)
+val chartColors = listOf(colorRed, colorBlue, colorGreen, colorPink, colorYellow, colorViolet, colorOrange)
 private val legendItemLabelTextSize = 12.sp
 private val legendItemIconSize = 8.dp
 private val legendItemIconPaddingValue = 10.dp

@@ -58,7 +58,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var mLight: Sensor? = null
     private var mPressure: Sensor? = null
     private var mHumidity: Sensor? = null
-    private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var database: SensorDatabase
     private lateinit var viewModel: MyViewModel
 
@@ -91,6 +90,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         getPermissions(requiredPermissions, requestPermissionsLauncher)
         initializeSensors()
         initializeWorkers()
+        insertMockData()
         setContent {
             val theme by viewModel.theme.observeAsState(true)
             val navController = rememberNavController()
@@ -181,6 +181,11 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                 }
             }
         }
+    }
+
+    private fun insertMockData() {
+        val list = createItemsAtLeastTwoMonthsBack()
+        list.forEach{ item -> viewModel.insertItem(item)}
     }
 
     private fun initializeWorkers() {
@@ -275,7 +280,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
     override fun onSensorChanged(event: SensorEvent) {
-        viewModel.saveSenorsToDatabase()
         when (event.sensor.type) {
             Sensor.TYPE_AMBIENT_TEMPERATURE -> viewModel.ambientTemp.postValue(event.values[0].toDouble())
             Sensor.TYPE_LIGHT -> viewModel.light.postValue(event.values[0].toDouble())
