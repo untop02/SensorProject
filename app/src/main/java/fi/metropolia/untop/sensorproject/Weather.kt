@@ -11,6 +11,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -23,6 +24,7 @@ import fi.metropolia.untop.sensorproject.data.MyViewModel
 
 @Composable
 fun Weather(modifier: Modifier, viewModel: MyViewModel) {
+    val weatherData = viewModel.weatherData.observeAsState()
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -44,22 +46,22 @@ fun Weather(modifier: Modifier, viewModel: MyViewModel) {
             ApiSensorData(
                 R.string.home_name_temp,
                 stringResource(id = R.string.home_name_temp),
-                viewModel.weatherData.value?.main?.temp.toString(),
+                weatherData.value?.main?.temp.toString(),
                 " °C"
             ), ApiSensorData(
                 R.string.home_name_hum,
                 stringResource(id = R.string.home_name_hum),
-                viewModel.weatherData.value?.main?.humidity.toString(),
+                weatherData.value?.main?.humidity.toString(),
                 " %"
             ), ApiSensorData(
                 R.string.home_name_pres,
                 stringResource(id = R.string.home_name_pres),
-                viewModel.weatherData.value?.main?.pressure.toString(),
+                weatherData.value?.main?.pressure.toString(),
                 " hPa"
             ), ApiSensorData(
                 R.string.home_name_illum,
                 stringResource(id = R.string.home_name_feels),
-                viewModel.weatherData.value?.main?.feels_like.toString(),
+                weatherData.value?.main?.feels_like.toString(),
                 " °C"
             )
         )

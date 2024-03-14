@@ -23,7 +23,6 @@ class ApiWorker(appContext: Context, params: WorkerParameters) :
                 weatherData(getLocation(applicationContext)), WeatherResponse::class.java
             )
             WeatherWorkerRepo.updateData(myData)
-
             Result.success()
         } catch (e: Exception) {
             Log.d("DBG", "CRASHED WORKER")
@@ -69,5 +68,4 @@ class ApiWorker(appContext: Context, params: WorkerParameters) :
             null
         }
     }
-
 }
