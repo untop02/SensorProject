@@ -1,5 +1,7 @@
 package fi.metropolia.untop.sensorproject
 
+import android.bluetooth.BluetoothAdapter
+import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,26 +36,29 @@ import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import fi.metropolia.untop.sensorproject.data.MyViewModel
-import fi.metropolia.untop.sensorproject.data.OfflineRepo
-import fi.metropolia.untop.sensorproject.data.SensorDatabase
 import java.math.RoundingMode
 import java.text.DecimalFormat
 
 lateinit var nullSensors: State<List<String>?>
 
 @Composable
-fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostController) {
+fun Home(
+    modifier: Modifier,
+    viewModel: MyViewModel,
+    navController: NavHostController,
+    permissionsGranted: HashMap<String, Boolean>,
+    bluetoothAdapter: BluetoothAdapter,
+    requestPermissionsLauncher: ActivityResultLauncher<Array<String>>,
+    requiredPermissions: Array<String>,
+) {
     nullSensors = viewModel.nullSensors.observeAsState()
     Column {
         Box(
@@ -93,6 +98,13 @@ fun Home(modifier: Modifier, viewModel: MyViewModel, navController: NavHostContr
             }
         }
         Weather(modifier = Modifier, viewModel = viewModel)
+        BluetoothList(
+            bluetoothAdapter = bluetoothAdapter,
+            viewModel = viewModel,
+            permissionsGranted = permissionsGranted,
+            requestPermissionsLauncher = requestPermissionsLauncher,
+            requiredPermissions = requiredPermissions,
+        )
     }
 }
 
@@ -170,7 +182,12 @@ fun NoSensorAlert(onDismiss: () -> Unit) {
         icon = {
             Icon(Icons.Default.Info, contentDescription = "Info icon")
         },
-        text = { Text(textAlign = TextAlign.Center, text = stringResource(id = R.string.alert_desc)) },
+        text = {
+            Text(
+                textAlign = TextAlign.Center,
+                text = stringResource(id = R.string.alert_desc)
+            )
+        },
         confirmButton = {
             Box(
                 modifier = Modifier
@@ -187,8 +204,6 @@ fun NoSensorAlert(onDismiss: () -> Unit) {
         }
     )
 }
-
-
 
 class GreyScaleModifier : DrawModifier {
     override fun ContentDrawScope.draw() {
@@ -208,22 +223,6 @@ class GreyScaleModifier : DrawModifier {
 fun Modifier.disabled() = this
     .then(GreyScaleModifier())
     .then(alpha(0.4f))
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun HomePrev() {
-    val context = LocalContext.current
-    val sensorDatabase = SensorDatabase.getDatabase(context)
-    val navController = rememberNavController()
-    Home(
-        modifier = Modifier, viewModel = MyViewModel(
-            OfflineRepo(
-                sensorDatabase.itemDao(),
-                sensorDatabase.settingsDao()
-            )
-        ), navController = navController
-    )
-}
 
 data class SensorData(
     val nameResId: Int,

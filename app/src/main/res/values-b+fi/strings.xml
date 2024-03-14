@@ -19,5 +19,11 @@
     <string name="row_name_out">Ulkona</string>
     <string name="alert_desc">Puhelimessa ei kyseistä sensoria!</string>
     <string name="history_no_data">Ei dataa mitä näyttää!</string>
+    <string name="home_scan">Aloita haku</string>
+    <string name="home_searching">Haetaan Bluetooth laitteita</string>
+    <string name="gatt_connection_permission">Vaaditaan Bluetooth-käyttöoikeudet</string>
+    <string name="gatt_connection_success">Yhteys laitteeseen luotu</string>
+    <string name="gatt_connection_connecting">Yhistetään laitteeseen..</string>
+    <string name="gatt_connection_disconnected">Yhteys laitteeseen katkaistu</string>
 
 </resources>

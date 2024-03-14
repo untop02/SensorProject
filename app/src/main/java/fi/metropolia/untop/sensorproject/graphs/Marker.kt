@@ -25,7 +25,7 @@ import com.patrykandpatrick.vico.core.marker.Marker
 
 @Composable
 internal fun rememberMarker(labelPosition: MarkerComponent.LabelPosition = MarkerComponent.LabelPosition.Top): Marker {
-    val labelBackgroundColor = MaterialTheme.colorScheme.surface
+    val labelBackgroundColor = MaterialTheme.colorScheme.surfaceTint
     val labelBackground =
         remember(labelBackgroundColor) {
             ShapeComponent(labelBackgroundShape, labelBackgroundColor.toArgb()).setShadow(

@@ -19,4 +19,10 @@
     <string name="row_name_out">Outside</string>
     <string name="alert_desc">Your phone does not have this sensor!</string>
     <string name="history_no_data">No data to show sorry bro!</string>
+    <string name="home_scan">Start scanning</string>
+    <string name="home_searching">Searching for bluetooth devices</string>
+    <string name="gatt_connection_permission">Bluetooth permissions required</string>
+    <string name="gatt_connection_success">Connected to device</string>
+    <string name="gatt_connection_connecting">Connecting to device...</string>
+    <string name="gatt_connection_disconnected">Disconnected from device</string>
 </resources>

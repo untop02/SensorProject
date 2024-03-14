@@ -1,6 +1,8 @@
 package fi.metropolia.untop.sensorproject
 
 import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.res.Configuration
 import android.hardware.Sensor
@@ -11,6 +13,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -55,12 +58,37 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var mLight: Sensor? = null
     private var mPressure: Sensor? = null
     private var mHumidity: Sensor? = null
+    private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var database: SensorDatabase
     private lateinit var viewModel: MyViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val permissionsGranted = HashMap<String, Boolean>()
+        val requiredPermissions: Array<String> = arrayOf(
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.INTERNET,
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.BLUETOOTH_CONNECT
+        )
+        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
+        val requestPermissionsLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                permissions.entries.forEach { entry ->
+                    if (entry.value) {
+                        permissionsGranted[entry.key] = entry.value
+                        Log.d("PermissionGranted", "Permission ${entry.key} is granted")
+                    } else {
+                        Log.d("PermissionDenied", "Permission ${entry.key} is denied")
+                    }
+                }
+            }
         initializeViewModelAndDatabase()
-        getPermissions()
+        getPermissions(requiredPermissions, requestPermissionsLauncher)
         initializeSensors()
         initializeWorkers()
         setContent {
@@ -110,14 +138,24 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                                 }
                             },
 
-                        ) { innerPadding ->
+                            ) { innerPadding ->
                             NavHost(
                                 navController = navController,
                                 startDestination = Destinations.Home.route,
                                 modifier = Modifier.padding(paddingValues = innerPadding),
                             ) {
                                 composable(Destinations.Home.route) {
-                                    Home(modifier = Modifier, viewModel, navController)
+                                    if (bluetoothAdapter != null) {
+                                        Home(
+                                            modifier = Modifier,
+                                            viewModel,
+                                            navController,
+                                            permissionsGranted,
+                                            bluetoothAdapter,
+                                            requestPermissionsLauncher,
+                                            requiredPermissions,
+                                        )
+                                    }
                                 }
                                 composable(Destinations.History.route) {
                                     History(modifier = Modifier, viewModel)
@@ -195,28 +233,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         viewModel.insertAllSettings(settings)
     }
 
-    private fun getPermissions() {
-        val requiredPermissions: Array<String> = arrayOf(
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.INTERNET,
-            Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.BLUETOOTH_CONNECT
-        )
-        val permissionsGranted = HashMap<String, Boolean>()
-        val requestPermissionsLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-                permissions.entries.forEach { entry ->
-                    if (entry.value) {
-                        permissionsGranted[entry.key] = entry.value
-                        Log.d("PermissionGranted", "Permission ${entry.key} is granted")
-                    } else {
-                        Log.d("PermissionDenied", "Permission ${entry.key} is denied")
-                    }
-                }
-            }
+    private fun getPermissions(
+        requiredPermissions: Array<String>,
+        requestPermissionsLauncher: ActivityResultLauncher<Array<String>>
+    ) {
         requestPermissionsLauncher.launch(requiredPermissions)
     }
 

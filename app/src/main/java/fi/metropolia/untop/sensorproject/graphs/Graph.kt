@@ -79,36 +79,38 @@ fun Graph(modifier: Modifier, viewModel: MyViewModel, name: String?) {
     var filteredHistory by rememberSaveable { mutableStateOf(history) }
 
     val modelProducer = remember { CartesianChartModelProducer.build() }
-    val dataTemperature = remember { filteredHistory.map { it.temperature } }
-    val dataHumidity = remember { filteredHistory.map { it.humidity } }
-    val dataPressure = remember { filteredHistory.map { it.pressure } }
-    val dataIlluminance = remember { filteredHistory.map { it.illuminance } }
 
 
-    modelProducer.tryRunTransaction {
-        when (name) {
-            "Temperature" -> lineSeries { series(dataTemperature) }
-            "Humidity" -> columnSeries { series(dataHumidity) }
-            "Pressure" -> lineSeries { series(dataPressure) }
-            "Illuminance" -> columnSeries { series(dataIlluminance) }
-            else -> {
-                lineSeries { series(dataTemperature) }
-                columnSeries { series(dataHumidity) }
-                lineSeries { series(dataPressure) }
-                columnSeries { series(dataIlluminance) }
+    LaunchedEffect(history) {
+        modelProducer.tryRunTransaction {
+            val dataTemperature = filteredHistory.map { it.temperature }
+            val dataHumidity =  filteredHistory.map { it.humidity }
+            val dataPressure = filteredHistory.map { it.pressure }
+            val dataIlluminance =   filteredHistory.map { it.illuminance }
+
+            when (name) {
+                "Temperature" -> lineSeries { series(dataTemperature) }
+                "Humidity" -> columnSeries { series(dataHumidity) }
+                "Pressure" -> lineSeries { series(dataPressure) }
+                "Illuminance" -> columnSeries { series(dataIlluminance) }
+                else -> {
+                    lineSeries { series(dataTemperature) }
+                    columnSeries { series(dataHumidity) }
+                    lineSeries { series(dataPressure) }
+                    columnSeries { series(dataIlluminance) }
+                }
             }
         }
     }
 
 
-    LaunchedEffect(selectedTimeInterval) {
+    LaunchedEffect(selectedTimeInterval, history) {
         filteredHistory = when (selectedTimeInterval) {
             TimeInterval.DAY -> getHistoryForDay(history)
             TimeInterval.WEEK -> getHistoryForWeek(history)
             TimeInterval.MONTH -> getHistoryForMonth(history)
             TimeInterval.All -> history
         }
-
     }
     Column(
         modifier

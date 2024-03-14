@@ -1,26 +1,83 @@
 package fi.metropolia.untop.sensorproject.data
 
+import android.Manifest
+import android.bluetooth.le.BluetoothLeScanner
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanResult
+import android.bluetooth.le.ScanSettings
+import android.content.Context
+import android.content.pm.PackageManager
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import fi.metropolia.untop.sensorproject.api.WeatherResponse
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() {
+    //Sensordata
     val ambientTemp = MutableLiveData(0.0)
     val humidity = MutableLiveData(0.0)
     val light = MutableLiveData(0.0)
     val pressure = MutableLiveData(0.0)
     val weatherData = MutableLiveData<WeatherResponse>()
+
+    //History
     var history = MutableLiveData<List<Item>>(emptyList())
+
+    //Settings
     var currentSettings = MutableLiveData<List<Setting>>(emptyList())
+
+    //Bluetooth
+    private val mResults = HashMap<String, ScanResult>()
+    val scanResults = MutableLiveData<List<ScanResult>>(null)
     var theme = MutableLiveData<Boolean>()
+
+    //Theme
     private var automatic = MutableLiveData(true)
     var isNightMode = MutableLiveData(false)
+
+    //Sensors
     var nullSensors = MutableLiveData<List<String>>(emptyList())
+
+    //Gatt
+    val connectionState = MutableLiveData("                                                                                                             ")
+    fun scanDevices(scanner: BluetoothLeScanner, context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val settings = ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .setReportDelay(0)
+                .build()
+
+            if (ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.BLUETOOTH_SCAN
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return@launch
+            }
+            scanner.startScan(null, settings, leScanCallback)
+            delay(SCAN_PERIOD)
+            scanner.stopScan(leScanCallback)
+            scanResults.postValue(mResults.values.toList().sortedBy { it.rssi }.asReversed())
+            Log.d("DBG", "This should be list: ${mResults.values.toList().sortedBy { it.rssi }.asReversed()}")
+        }
+    }
+
+    private val leScanCallback: ScanCallback = object : ScanCallback() {
+        override fun onScanResult(callbackType: Int, result: ScanResult) {
+            super.onScanResult(callbackType, result)
+            val device = result.device
+            val deviceAddress = device.address
+            mResults[deviceAddress] = result
+            Log.d("DBG", "Device address: $deviceAddress (${result.isConnectable})")
+        }
+    }
 
     private fun insertItem(item: Item) {
         viewModelScope.launch {
@@ -55,6 +112,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
             }
         }
     }
+
     fun updateSettingValue(name: String, newValue: Boolean) {
         viewModelScope.launch {
             try {
@@ -73,6 +131,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
             emptyList()
         }
     }
+
     fun updateSettings(settings: List<Setting>) {
         val automaticValue = settings.getOrNull(0)?.currentValue ?: true
         automatic.postValue(automaticValue)
@@ -106,5 +165,9 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
             weatherData.value?.main?.pressure?.toDouble() ?: 0.0,
         )
         insertItem(newItem)
+    }
+
+    companion object GattAttributes {
+        const val SCAN_PERIOD: Long = 5000
     }
 }

@@ -92,7 +92,12 @@ dependencies {
     // Houses the core logic for charts and other elements. Included in all other modules.
     implementation("com.patrykandpatrick.vico:core:2.0.0-alpha.8")
 
+    //ROOM
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
+
+    dependencies {
+        implementation ("no.nordicsemi.android:ble:2.0.0")
+    }
 }
