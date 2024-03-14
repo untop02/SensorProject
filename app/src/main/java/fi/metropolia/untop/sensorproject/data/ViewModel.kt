@@ -81,7 +81,7 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
         }
     }
 
-    private fun insertItem(item: Item) {
+    fun insertItem(item: Item) {
         viewModelScope.launch {
             try {
                 sensorRepository.insertItem(item)

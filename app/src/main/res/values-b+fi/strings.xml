@@ -25,6 +25,9 @@
     <string name="gatt_connection_success">Yhteys laitteeseen luotu</string>
     <string name="gatt_connection_connecting">Yhistetään laitteeseen..</string>
     <string name="gatt_connection_disconnected">Yhteys laitteeseen katkaistu</string>
+    <string name="graph_name_apiTemp">LämpötilaApi</string>
+    <string name="graph_name_apiPress">IlmanpaineApi</string>
+    <string name="graph_name_apiHumi">KosteusApi</string>
     <string name="all">Kaikki</string>
     <string name="month">Kuukausi</string>
     <string name="week">Viikko</string>

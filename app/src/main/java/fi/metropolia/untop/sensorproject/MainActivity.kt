@@ -55,7 +55,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private var mLight: Sensor? = null
     private var mPressure: Sensor? = null
     private var mHumidity: Sensor? = null
-    private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var database: SensorDatabase
     private lateinit var viewModel: MyViewModel
 
@@ -88,6 +87,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         getPermissions(requiredPermissions, requestPermissionsLauncher)
         initializeSensors()
         initializeWorkers()
+        insertMockData()
         viewModel.weatherData.observe(this) {
             viewModel.saveSenorsToDatabase()
         }
@@ -183,6 +183,11 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         }
     }
 
+    private fun insertMockData() {
+        val list = createItemsAtLeastTwoMonthsBack()
+        list.forEach{ item -> viewModel.insertItem(item)}
+    }
+
     private fun initializeWorkers() {
         val periodicWorkRequest =
             PeriodicWorkRequestBuilder<ApiWorker>(20, TimeUnit.MINUTES).build()
@@ -260,21 +265,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     override fun onSensorChanged(event: SensorEvent) {
 
         when (event.sensor.type) {
-            Sensor.TYPE_AMBIENT_TEMPERATURE -> {
-                viewModel.ambientTemp.postValue(event.values[0].toDouble())
-            }
-
-            Sensor.TYPE_LIGHT -> {
-                viewModel.light.postValue(event.values[0].toDouble())
-            }
-
-            Sensor.TYPE_PRESSURE -> {
-                viewModel.pressure.postValue(event.values[0].toDouble())
-            }
-
-            Sensor.TYPE_RELATIVE_HUMIDITY -> {
-                viewModel.humidity.postValue(event.values[0].toDouble())
-            }
+            Sensor.TYPE_AMBIENT_TEMPERATURE -> viewModel.ambientTemp.postValue(event.values[0].toDouble())
+            Sensor.TYPE_LIGHT -> viewModel.light.postValue(event.values[0].toDouble())
+            Sensor.TYPE_PRESSURE -> viewModel.pressure.postValue(event.values[0].toDouble())
+            Sensor.TYPE_RELATIVE_HUMIDITY -> viewModel.humidity.postValue(event.values[0].toDouble())
         }
     }
 }
