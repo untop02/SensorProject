@@ -1,5 +1,6 @@
-package api
+package fi.metropolia.untop.sensorproject.api
 
+import fi.metropolia.untop.sensorproject.BuildConfig
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
@@ -9,14 +10,14 @@ import retrofit2.http.Query
 object RetrofitInstance {
     //https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=7e110d7bc0a43143d9e7eff08e3bba31&units=metric
     private const val BASE_URL = "https://api.openweathermap.org/data/2.5/"
-    private const val API_KEY = "7e110d7bc0a43143d9e7eff08e3bba31"
+    const val APIKEY = BuildConfig.API_KEY
 
     interface WeatherService {
         @GET("weather")
         suspend fun getWeather(
             @Query("lat") lat: Double,
             @Query("lon") lon: Double,
-            @Query("appid") apiKey: String = API_KEY,
+            @Query("appid") apiKey: String = APIKEY,
             @Query("units") units: String = "metric"
         ): WeatherResponse
     }
