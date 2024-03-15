@@ -4,7 +4,7 @@ import fi.metropolia.untop.sensorproject.data.Item
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-fun createItemsAtLeastTwoMonthsBack(): List<Item> {
+fun createMockData(): List<Item> {
     val currentDate = LocalDate.now()
     val twoMonthsAgo = currentDate.minusMonths(1)
 

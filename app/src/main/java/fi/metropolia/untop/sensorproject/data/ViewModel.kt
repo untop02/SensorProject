@@ -67,7 +67,6 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
             delay(SCAN_PERIOD)
             scanner.stopScan(leScanCallback)
             scanResults.postValue(mResults.values.toList().sortedBy { it.rssi }.asReversed())
-            Log.d("DBG", "This should be list: ${mResults.values.toList().sortedBy { it.rssi }.asReversed()}")
         }
     }
 
@@ -77,7 +76,6 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
             val device = result.device
             val deviceAddress = device.address
             mResults[deviceAddress] = result
-            Log.d("DBG", "Device address: $deviceAddress (${result.isConnectable})")
         }
     }
 

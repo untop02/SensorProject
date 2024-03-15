@@ -21,8 +21,6 @@ interface SensorDao {
     @Query("SELECT * FROM items")
     suspend fun getALL(): List<Item>
 
-    //Tietystä ajasta tiettyyn
-    //@Query("SELECT * FROM items WHERE ")
 }
 
 @Dao

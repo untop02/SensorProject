@@ -95,7 +95,6 @@ class GattClientCallback(private val context: Context, private val viewModel: My
                 for (gattCharacteristic in gattService.characteristics) {
                     Log.d("DBG", "Characteristic ${gattCharacteristic.uuid}")
                 }
-                // setup the system for the notification messages
                 val characteristic = gatt.getService(HEART_RATE_SERVICE_UUID)
                     .getCharacteristic(HEART_RATE_MEASUREMENT_CHAR_UUID)
                 if (ActivityCompat.checkSelfPermission(
