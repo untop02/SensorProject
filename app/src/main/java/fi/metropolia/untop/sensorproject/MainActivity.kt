@@ -31,6 +31,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -47,6 +48,9 @@ import fi.metropolia.untop.sensorproject.data.SensorDatabase
 import fi.metropolia.untop.sensorproject.data.Setting
 import fi.metropolia.untop.sensorproject.graphs.Graph
 import fi.metropolia.untop.sensorproject.ui.theme.SensorProjectTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity(), SensorEventListener {
@@ -174,28 +178,47 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     }
 
     private fun insertMockData() {
-        val list = createItemsAtLeastTwoMonthsBack()
-        list.forEach { item -> viewModel.insertItem(item) }
+        val list = createMockData()
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                list.forEach { item ->
+                    viewModel.insertItem(item)
+                }
+            }
+        }
     }
-
 
     private fun initializeViewModelAndDatabase() {
         database = SensorDatabase.getDatabase(this)
         viewModel = MyViewModel(OfflineRepo(database.itemDao(), database.settingsDao()))
-        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        Log.d("DBG", (currentNightMode == Configuration.UI_MODE_NIGHT_YES).toString())
-        viewModel.isNightMode.postValue(currentNightMode == Configuration.UI_MODE_NIGHT_YES)
-        val settings = listOf(
+        insertSettings()
+    }
+
+    private fun insertSettings() {
+        val nightMode = isNightModeEnabled()
+        viewModel.isNightMode.postValue(nightMode)
+        val settings = createSettingsList(nightMode)
+        viewModel.insertAllSettings(settings)
+    }
+
+    private fun createSettingsList(nightMode: Boolean): List<Setting> {
+        return listOf(
             Setting(
-                name = "Automatic", description = "Automatically change theme", currentValue = true
+                name = "Automatic",
+                description = "Automatically change theme",
+                currentValue = true
             ),
             Setting(
                 name = "Theme",
                 description = "Change application theme",
-                currentValue = currentNightMode == Configuration.UI_MODE_NIGHT_YES
+                currentValue = nightMode
             ),
         )
-        viewModel.insertAllSettings(settings)
+    }
+
+    private fun isNightModeEnabled(): Boolean {
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        return currentNightMode == Configuration.UI_MODE_NIGHT_YES
     }
 
     private fun getPermissions(
@@ -218,19 +241,18 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                 }
             }
 
-        Log.d("DBG", "Launching permissions request")
         requestPermissionsLauncher.launch(requiredPermissions)
     }
 
 
     private fun initializeWorkers() {
-            val periodicWorkRequest =
-                PeriodicWorkRequestBuilder<ApiWorker>(20, TimeUnit.MINUTES).build()
-            val initialWorkRequest = OneTimeWorkRequestBuilder<ApiWorker>().build()
-            WorkManager.getInstance(this).enqueue(initialWorkRequest)
-            WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-                "interval_check", ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest
-            )
+        val periodicWorkRequest =
+            PeriodicWorkRequestBuilder<ApiWorker>(20, TimeUnit.MINUTES).build()
+        val initialWorkRequest = OneTimeWorkRequestBuilder<ApiWorker>().build()
+        WorkManager.getInstance(this).enqueue(initialWorkRequest)
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "interval_check", ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest
+        )
     }
 
     //starting the phones internal sensors
