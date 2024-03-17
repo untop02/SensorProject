@@ -134,12 +134,13 @@ class MyViewModel(private val sensorRepository: SensorRepository) : ViewModel() 
 
     fun updateSettings(settings: List<Setting>) {
         val automaticValue = settings.getOrNull(0)?.currentValue ?: true
+        val currentThemeValue = settings.getOrNull(1)?.currentValue ?: true
         automatic.postValue(automaticValue)
 
         val themeValue = if (automaticValue) {
             isNightMode.value
         } else {
-            settings.getOrNull(1)?.currentValue
+            currentThemeValue
         }
 
         themeValue?.let { newValue ->

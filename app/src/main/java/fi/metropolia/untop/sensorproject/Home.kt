@@ -54,11 +54,11 @@ fun Home(
     modifier: Modifier,
     viewModel: MyViewModel,
     navController: NavHostController,
-    permissionsGranted: HashMap<String, Boolean>,
     bluetoothAdapter: BluetoothAdapter,
     requestPermissionsLauncher: ActivityResultLauncher<Array<String>>,
-    requiredPermissions: Array<String>,
-) {
+    requiredPermissions: HashMap<String, Boolean>,
+
+    ) {
     nullSensors = viewModel.nullSensors.observeAsState()
     Column {
         Box(
@@ -102,9 +102,8 @@ fun Home(
         BluetoothList(
             bluetoothAdapter = bluetoothAdapter,
             viewModel = viewModel,
-            permissionsGranted = permissionsGranted,
-            requestPermissionsLauncher = requestPermissionsLauncher,
             requiredPermissions = requiredPermissions,
+            requestPermissionsLauncher = requestPermissionsLauncher,
         )
     }
 }

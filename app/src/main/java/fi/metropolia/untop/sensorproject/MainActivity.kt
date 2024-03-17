@@ -62,23 +62,22 @@ class MainActivity : ComponentActivity(), SensorEventListener {
     private lateinit var database: SensorDatabase
     private lateinit var viewModel: MyViewModel
     private lateinit var requestPermissionsLauncher: ActivityResultLauncher<Array<String>>
-    private lateinit var permissionsGranted: HashMap<String, Boolean>
+    private lateinit var requiredPermissions: HashMap<String, Boolean>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val requiredPermissions: Array<String> = arrayOf(
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.INTERNET,
-            Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.BLUETOOTH_CONNECT
+        requiredPermissions = hashMapOf(
+            Manifest.permission.BLUETOOTH to false,
+            Manifest.permission.BLUETOOTH_ADMIN to false,
+            Manifest.permission.ACCESS_FINE_LOCATION to false,
+            Manifest.permission.ACCESS_COARSE_LOCATION to false,
+            Manifest.permission.INTERNET to false,
+            Manifest.permission.BLUETOOTH_SCAN to false,
+            Manifest.permission.BLUETOOTH_CONNECT to false
         )
-        permissionsGranted = HashMap()
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
-        getPermissions(requiredPermissions)
+        getPermissions()
         initializeViewModelAndDatabase()
         initializeSensors()
         insertMockData()
@@ -144,7 +143,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                                             modifier = Modifier,
                                             viewModel,
                                             navController,
-                                            permissionsGranted,
                                             bluetoothAdapter,
                                             requestPermissionsLauncher,
                                             requiredPermissions,
@@ -221,27 +219,26 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         return currentNightMode == Configuration.UI_MODE_NIGHT_YES
     }
 
-    private fun getPermissions(
-        requiredPermissions: Array<String>
-    ) {
+    private fun getPermissions() {
+        val permissionNames = requiredPermissions.map { it.key }.toTypedArray()
         requestPermissionsLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 permissions.entries.forEach { entry ->
                     if (entry.value) {
-                        permissionsGranted[entry.key] = entry.value
+                        requiredPermissions[entry.key] = entry.value
                         Log.d("DBG", "Permission ${entry.key} is granted")
                     } else {
                         Log.d("DBG", "Permission ${entry.key} is denied")
                     }
                 }
-                if (permissionsGranted.contains("android.permission.ACCESS_FINE_LOCATION")
-                    && permissionsGranted.contains("android.permission.ACCESS_COARSE_LOCATION")
+                if (requiredPermissions.contains("android.permission.ACCESS_FINE_LOCATION")
+                    && requiredPermissions.contains("android.permission.ACCESS_COARSE_LOCATION")
                 ) {
                     initializeWorkers()
                 }
             }
 
-        requestPermissionsLauncher.launch(requiredPermissions)
+        requestPermissionsLauncher.launch(permissionNames)
     }
 
 

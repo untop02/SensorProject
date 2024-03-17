@@ -43,9 +43,8 @@ import fi.metropolia.untop.sensorproject.data.MyViewModel
 fun BluetoothList(
     bluetoothAdapter: BluetoothAdapter?,
     viewModel: MyViewModel,
-    permissionsGranted: HashMap<String, Boolean>,
+    requiredPermissions: HashMap<String, Boolean>,
     requestPermissionsLauncher: ActivityResultLauncher<Array<String>>,
-    requiredPermissions: Array<String>,
 ) {
     val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
@@ -62,10 +61,11 @@ fun BluetoothList(
                 SearchList(
                     viewModel = viewModel,
                     requestPermissionsLauncher = requestPermissionsLauncher,
-                    requiredPermissions = requiredPermissions,
                     bluetoothAdapter = bluetoothAdapter,
-                    gattClientCallback = gattClientCallback
-                )
+                    gattClientCallback = gattClientCallback,
+                    requiredPermissions = requiredPermissions,
+
+                    )
             }
         }
     }
@@ -73,7 +73,7 @@ fun BluetoothList(
         ElevatedButton(
             onClick = {
                 showDialog = true
-                if (bluetoothAdapter != null && permissionsGranted.containsKey("android.permission.BLUETOOTH_SCAN")) {
+                if (bluetoothAdapter != null && requiredPermissions.containsKey("android.permission.BLUETOOTH_SCAN")) {
                     viewModel.scanDevices(
                         bluetoothAdapter.bluetoothLeScanner, context
                     )
@@ -98,9 +98,9 @@ fun BluetoothList(
 private fun SearchList(
     viewModel: MyViewModel,
     requestPermissionsLauncher: ActivityResultLauncher<Array<String>>,
-    requiredPermissions: Array<String>,
     bluetoothAdapter: BluetoothAdapter?,
-    gattClientCallback: GattClientCallback
+    gattClientCallback: GattClientCallback,
+    requiredPermissions: HashMap<String, Boolean>
 ) {
     val connectionState by viewModel.connectionState.observeAsState("TEST")
     val context = LocalContext.current
@@ -109,7 +109,8 @@ private fun SearchList(
             context, Manifest.permission.BLUETOOTH_CONNECT
         ) != PackageManager.PERMISSION_GRANTED
     ) {
-        requestPermissionsLauncher.launch(requiredPermissions)
+        val permissions = requiredPermissions.map { it.key }.toTypedArray()
+        requestPermissionsLauncher.launch(permissions)
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
